@@ -17,6 +17,6 @@ datasource db {
 
 model User {
   id Int @id @default(autoincrement())
-  publicAddress String @unique
+  ethAddress String @unique
   email String? @unique
 }
