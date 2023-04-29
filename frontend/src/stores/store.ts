@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 
 export interface User{
   userId:number;
+  ethAddress:string;
 } 
 
 export default defineStore('counter', () => {

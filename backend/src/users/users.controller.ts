@@ -20,7 +20,8 @@ export class UsersController {
     const message = 'Please sign up to our app using your Ethereum address.';
     const recoveredAddress = ethUtil.recoverPersonalSignature({
       data:message,
-      signature:signature
+      signature:signature,
+      
     })
     if (recoveredAddress.toLowerCase() !== ethAddress.toLowerCase()) {
       throw new BadRequestException('Invalid signature.');

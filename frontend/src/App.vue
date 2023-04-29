@@ -2,9 +2,9 @@
 import { RouterLink, RouterView } from 'vue-router'
 import AccountIcon from './components/account-icon.vue';
 import useStore from "@/stores/store"
-import Web3 from "web3"
+import ethers from "ethers"
 import { bufferToHex } from 'ethereumjs-util';
-import { ref } from 'vue';
+import { provide, ref } from 'vue';
 
 const store = useStore()
 
@@ -16,12 +16,15 @@ async function handleMetamaskLogin() {
       metaMaskLoginDisabled.value = true
       throw new Error("Metamask wallet not detected!")
     }
-    const web3 = new Web3(window.ethereum);
-    const accounts = await web3.eth.requestAccounts();
-    const address = accounts[0];
+    const provider = new ethers.BrowserProvider(window.ethereum)
+    const accounts = await provider.listAccounts()
+    const account = accounts[0];
     const message = "some message";
- 
-    const signature = bufferToHex(await web3.currentProvider.send('personal_sign', [message, address]));
+    let dataHash = ethers.keccak256(
+      ethers.toUtf8Bytes(JSON.stringify(message))
+    );
+    const dataHashBin = ethers.getBytes(dataHash)
+    const signature = await account.signMessage(dataHashBin)
     const data = { message, signature };
   } catch (err) {
     console.error('Failed to log in with Metamask', err);
