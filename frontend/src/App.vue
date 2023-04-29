@@ -2,9 +2,9 @@
 import { RouterLink, RouterView } from 'vue-router'
 import AccountIcon from './components/account-icon.vue';
 import useStore from "@/stores/store"
-import ethers from "ethers"
+import {BrowserProvider,keccak256,getBytes,toUtf8Bytes} from "ethers"
 import { bufferToHex } from 'ethereumjs-util';
-import { provide, ref } from 'vue';
+import { ref } from 'vue';
 
 const store = useStore()
 
@@ -12,20 +12,26 @@ const metaMaskButtonText = ref("Log in with Metamask")
 const metaMaskLoginDisabled = ref(false)
 async function handleMetamaskLogin() {
   try {
+    console.log("hello world");
+    
     if (!window.ethereum) {
+      console.log("Metamask wallet not detected"!);
+      
       metaMaskLoginDisabled.value = true
       throw new Error("Metamask wallet not detected!")
     }
-    const provider = new ethers.BrowserProvider(window.ethereum)
+    const provider = new BrowserProvider(window.ethereum)
     const accounts = await provider.listAccounts()
     const account = accounts[0];
     const message = "some message";
-    let dataHash = ethers.keccak256(
-      ethers.toUtf8Bytes(JSON.stringify(message))
+    let dataHash = keccak256(
+      toUtf8Bytes(JSON.stringify(message))
     );
-    const dataHashBin = ethers.getBytes(dataHash)
+    const dataHashBin = getBytes(dataHash)
     const signature = await account.signMessage(dataHashBin)
     const data = { message, signature };
+    console.log(data);
+    
   } catch (err) {
     console.error('Failed to log in with Metamask', err);
     metaMaskButtonText.value = (err as Error).message
@@ -49,7 +55,7 @@ async function handleMetamaskLogin() {
           <span>0x1234...5678</span>
         </div>
         <div v-else>
-          <button  @click="handleMetamaskLogin" :disabled="!metaMaskLoginDisabled" class="login-button">{{ metaMaskButtonText }}</button>
+          <button :class="{'normal-state':!metaMaskLoginDisabled,'error-state':metaMaskLoginDisabled}"  @click="handleMetamaskLogin" :disabled="metaMaskLoginDisabled" class="login-button">{{ metaMaskButtonText }}</button>
         </div>
         <div>
 
@@ -120,8 +126,24 @@ header {
   width: 30px;
 }
 
+.normal-state {
+  background-color: #4caf50;
+}
+
+.normal-state:hover {
+  background-color: #3e8e41;
+}
+
+.error-state {
+  background-color: #f44336;
+}
+
+.error-state:hover {
+  background-color: #c62828;
+}
+
 .login-button {
-    background-color: #4caf50;
+    
     color: white;
     border: none;
     border-radius: 4px;
