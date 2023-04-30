@@ -3,7 +3,7 @@ import { RouterLink, RouterView } from 'vue-router'
 import AccountIcon from './components/account-icon.vue';
 import useStore from "@/stores/store"
 import {BrowserProvider,keccak256,getBytes,toUtf8Bytes} from "ethers"
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import {getNonce,loginUser} from "@/utils/api"
 const store = useStore()
 
@@ -12,7 +12,6 @@ const metaMaskLoginDisabled = ref(false)
 
 
 async function handleMetamaskLogin() {
-  
   try {
     if (!window.ethereum) {
       const error = "Metamask wallet not detected!"
@@ -35,12 +34,16 @@ async function handleMetamaskLogin() {
     const signature = await account.signMessage(dataHash)
     const data = { nonce, signature };
     const loggedUser = await loginUser(account.address,data)
-    store.user = loggedUser.user
+    store.loginUser(loggedUser.user)
   } catch (err) {
     console.error('Failed to log in with Metamask', err);
     
   }
 }
+
+onMounted(async () => {
+  await store.sVerifyUser()
+})
 </script>
 
 <template>

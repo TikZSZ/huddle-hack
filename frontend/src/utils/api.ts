@@ -17,3 +17,8 @@ export async function loginUser(ethAddress:string,data:{nonce:string,signature:s
   const {data:resp} = await api.post<{user:User,token:string}>(`/users/${ethAddress}/login`,data)
   return resp
 }
+
+export async function verifyUser(){
+  const {data:resp} = await api.post<User>(`/users/verifyUser`)
+  return resp
+}

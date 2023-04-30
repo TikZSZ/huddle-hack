@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { User } from '@/utils/types'
+import { verifyUser } from '@/utils/api'
 
 
 
@@ -17,5 +18,18 @@ export default defineStore('counter', () => {
     return !!user.value && !!user.value.id
   }
 
-  return { count, doubleCount, increment,isLoggedIn,user }
+  function loginUser(loggedUser:User){
+    user.value = loggedUser
+  }
+
+  async function sVerifyUser(){
+    try {
+      const user = await verifyUser()
+      loginUser(user)
+    }catch(err){
+      console.error(err);
+    }
+  }
+
+  return { count, doubleCount, increment,isLoggedIn,user,loginUser,sVerifyUser }
 })

@@ -1,10 +1,11 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, Query, UnauthorizedException } from '@nestjs/common';
-import { sign } from 'crypto';
+import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, Query, Req, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import {recoverPersonalSignature} from "@metamask/eth-sig-util"
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
-import { User } from '@prisma/client';
+import { GetJwtToken } from 'src/global/decorators/param.decorator';
+import { JwtToken } from 'src/global/types/JwtToken';
+import { Request } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -24,7 +25,7 @@ export class UsersController {
   }
 
   @Post('/:ethAddress/login')
-  async signup(@Param("ethAddress") ethAddress:string,@Body() data: { nonce: string, signature: string })  {
+  async signup(@Param("ethAddress") ethAddress:string,@Body() data: { nonce: string, signature: string },@Req() req:Request)  {
     const { nonce, signature } = data;
 
     const user = await this.prisma.user.findUnique({ where:{ethAddress}});
@@ -44,6 +45,16 @@ export class UsersController {
     }
     // Generate JWT
     const token = this.jwtService.sign({ userId: user.id });
+    req.session!["user"] = token
     return { user,token };
+  }
+
+  @Post('/verifyUser')
+  async verifyAccess(@GetJwtToken() jwtToken:JwtToken)  {
+    if(!jwtToken) throw new UnauthorizedException()
+    const user = await this.prisma.user.findUnique({where:{id:jwtToken.userId}})
+    if(user) {
+      return user
+    }
   }
 }
