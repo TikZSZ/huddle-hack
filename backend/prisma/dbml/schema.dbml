@@ -22,8 +22,8 @@ Table Experience {
   roomCreationTime DateTime [not null]
   tokenGatedRoom Boolean [not null]
   tokenGatedRecording Boolean [not null]
-  userId Int [not null]
-  user User [not null]
+  ownerId Int [not null]
+  owner User [not null]
   hosts User [not null]
   roomConfig RoomConfig
   recordingMetadata RecordingMetadata
@@ -105,7 +105,7 @@ Enum ConditionType {
   HAVE_HANDLE
 }
 
-Ref: Experience.userId > User.id
+Ref: Experience.ownerId > User.id
 
 Ref: RoomConfig.experianceId - Experience.id
 

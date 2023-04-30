@@ -40,8 +40,8 @@ model Experience {
   roomCreationTime    DateTime
   tokenGatedRoom      Boolean
   tokenGatedRecording Boolean
-  userId              Int
-  user                User               @relation(fields: [userId], references: [id])
+  ownerId              Int
+  owner                User               @relation(fields: [ownerId], references: [id])
   hosts               User[]             @relation(name: "shared_experiances")
   roomConfig          RoomConfig?
   recordingMetadata   RecordingMetadata?
