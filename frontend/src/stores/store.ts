@@ -1,10 +1,8 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import type { User } from '@/utils/types'
 
-export interface User{
-  userId:number;
-  ethAddress:string;
-} 
+
 
 export default defineStore('counter', () => {
   const count = ref(0)
@@ -16,8 +14,8 @@ export default defineStore('counter', () => {
   const user = ref<User|null>(null)
 
   function isLoggedIn(){
-    return !!user.value && !!user.value.userId
+    return !!user.value && !!user.value.id
   }
 
-  return { count, doubleCount, increment,isLoggedIn }
+  return { count, doubleCount, increment,isLoggedIn,user }
 })

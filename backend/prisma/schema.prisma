@@ -16,7 +16,104 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  ethAddress String @unique
-  email String? @unique
+  id          Int          @id @default(autoincrement())
+  ethAddress  String       @unique
+  email       String?      @unique
+  nonce String
+  roomConfigs RoomConfig[]
+  Experience  Experience[]
+}
+
+model Experience {
+  id                  Int               @id @default(autoincrement())
+  expTitle            String
+  expDescription      String?
+  participantsAllowed Int
+  currentParticipants Int
+  roomId              Int
+  timeCreated         DateTime
+  tokenGatedRoom      Boolean
+  tokenGatedRecording Boolean
+  user                User              @relation(fields: [userId], references: [id])
+  roomConfig          RoomConfig        @relation(fields: [roomConfigId], references: [id])
+  recordingMetadata   RecordingMetadata @relation(fields: [recordingMetadataId], references: [id])
+  recordings          Recording[]
+  experianceStats     ExperianceStats   @relation(fields: [experianceStatsId], references: [id])
+  userId              Int
+  roomConfigId        Int
+  recordingMetadataId Int
+  experianceStatsId   Int
+}
+
+model RoomConfig {
+  id              Int       @id @default(autoincrement())
+  roomTitle       String
+  roomDescription String?
+  startTime       DateTime?
+  expiryTime      DateTime?
+  hostWallets     User[]
+  roomLocked      Boolean   @default(true)
+  muteOnEntry     Boolean   @default(true)
+  videoOnEntry    Boolean   @default(true)
+
+  // token gated room configs
+  tokenType       TokenType?
+  chain           Chain?
+  contractAddress String?
+  conditionType   ConditionType?
+  conditionValue  String?
+  Experience      Experience[]
+}
+
+model RecordingMetadata {
+  id              Int          @id @default(autoincrement())
+  chain           Chain?
+  tokenType       TokenType?
+  contractAddress String?
+  Experience      Experience[]
+}
+
+model Recording {
+  id             Int         @id @default(autoincrement())
+  dateRecorded   DateTime
+  url            String?
+  recTitle       String
+  recDescription String
+  Experience     Experience? @relation(fields: [experienceId], references: [id])
+  experienceId   Int?
+}
+
+model ExperianceStats {
+  id               Int              @id @default(autoincrement())
+  experianceStatus ExperianceStatus @default(FINISHED)
+  totalRatings     Int              @default(0)
+  overallRating    Int              @default(0)
+  lastMeet         DateTime?
+  Experience       Experience[]
+}
+
+enum ExperianceStatus {
+  ONGOING
+  FINISHED
+}
+
+enum Chain {
+  ETHEREUM
+  COSMOS
+  SOLANA
+  TEZOS
+  BSC
+}
+
+enum TokenType {
+  ERC20
+  ERC721
+  ERC1155
+  SPL
+  BEP20
+}
+
+enum ConditionType {
+  FOLLOW_HANDLE
+  HAVE_HANDLE
 }

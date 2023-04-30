@@ -9,8 +9,8 @@ async function bootstrap() {
     credentials: true,
     origin:
       process.env.NODE_ENV === 'production'
-        ? 'http://localhost:5173/'
-        : ['http://localhost:5173/', 'http://localhost:5173/'],
+        ? 'http://localhost:5173'
+        : ['http://localhost:5173', 'http://localhost:5173'],
     exposedHeaders: ['SET-COOKIE', 'AUTHORIZATION'],
   });
   await app.listen(5000);

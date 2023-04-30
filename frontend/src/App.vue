@@ -4,7 +4,7 @@ import AccountIcon from './components/account-icon.vue';
 import useStore from "@/stores/store"
 import {BrowserProvider,keccak256,getBytes,toUtf8Bytes} from "ethers"
 import { ref } from 'vue';
-import {userExsists} from "@/utils/api"
+import {getNonce,loginUser} from "@/utils/api"
 const store = useStore()
 
 const metaMaskButtonText = ref("Log in with Metamask")
@@ -17,6 +17,7 @@ async function handleMetamaskLogin() {
     if (!window.ethereum) {
       const error = "Metamask wallet not detected!"
       metaMaskButtonText.value = error
+      metaMaskLoginDisabled.value = true
       throw new Error(error)
     }
     const provider = new BrowserProvider(window.ethereum)
@@ -24,19 +25,20 @@ async function handleMetamaskLogin() {
     
     const accounts = await provider.listAccounts()
     const account = accounts[0];
-    const userExists = await userExsists(account.address)
-    const message = "some message";
-    let dataHash = keccak256(
-      toUtf8Bytes(JSON.stringify(message))
-    );
+    const nonce = await getNonce(account.address)
+    const message = `Please sign this ${nonce}`;
+    let dataHash = toUtf8Bytes(message)
+    
     const dataHashBin = getBytes(dataHash)
-    const signature = await account.signMessage(dataHashBin)
-    const data = { message, signature };
+    console.log(dataHashBin);
     
-    
+    const signature = await account.signMessage(dataHash)
+    const data = { nonce, signature };
+    const loggedUser = await loginUser(account.address,data)
+    store.user = loggedUser.user
   } catch (err) {
     console.error('Failed to log in with Metamask', err);
-    metaMaskLoginDisabled.value = true
+    
   }
 }
 </script>
@@ -49,25 +51,23 @@ async function handleMetamaskLogin() {
       <div class="navbar-menu">
         <RouterLink to="/" >Home</RouterLink>
         <a href="#">Discover</a>
-        <a href="#">Dashboard</a>
+        <!-- <a href="#">Dashboard</a> -->
+        <RouterLink to="/dashboard" >Dashboard</RouterLink>
       </div>
       <div class="navbar-account">
-        <div v-if="store.isLoggedIn()">
-          <AccountIcon alt="User Avatar" />
-          <span>0x1234...5678</span>
+        <div v-if="store.isLoggedIn()" style="display: flex;">
+          <AccountIcon  alt="User Avatar" />
+          <span style="margin-left: 5px;">0x1234...5678</span>
         </div>
         <div v-else>
           <button :class="{'normal-state':!metaMaskLoginDisabled,'error-state':metaMaskLoginDisabled}"  @click="handleMetamaskLogin" :disabled="metaMaskLoginDisabled" class="login-button">{{ metaMaskButtonText }}</button>
         </div>
-        <div>
-
-        </div>
-        
       </div>
     </nav>
   </header>
-
-  <RouterView />
+  <div class="content">
+    <RouterView />
+  </div>
   </div>
 </template>
 
@@ -79,6 +79,11 @@ header {
   right: 0;
   z-index: 100;
 }
+
+.content {
+    margin-top: 60px; /* set margin-top equal to the height of the navbar */
+  }
+
 .navbar {
   background-color: var(--vt-c-black);
   color: var(--vt-c-white);
