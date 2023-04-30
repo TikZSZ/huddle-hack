@@ -1,0 +1,116 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id Int [pk, increment]
+  ethAddress String [unique, not null]
+  email String [unique]
+  nonce String [not null]
+  roomConfigs RoomConfig [not null]
+  hostedExperiances Experience [not null]
+  sharedExperiances Experience [not null]
+}
+
+Table Experience {
+  id Int [pk, increment]
+  expTitle String [not null]
+  expDescription String
+  participantsAllowed Int [not null]
+  currentParticipants Int [not null]
+  roomId Int [not null]
+  roomCreationTime DateTime [not null]
+  tokenGatedRoom Boolean [not null]
+  tokenGatedRecording Boolean [not null]
+  userId Int [not null]
+  user User [not null]
+  hosts User [not null]
+  roomConfig RoomConfig
+  recordingMetadata RecordingMetadata
+  recordings Recording [not null]
+  experianceStats ExperianceStats
+}
+
+Table RoomConfig {
+  id Int [pk, increment]
+  roomTitle String [not null]
+  roomDescription String
+  startTime DateTime
+  expiryTime DateTime
+  hostWallets User [not null]
+  roomLocked Boolean [not null, default: true]
+  muteOnEntry Boolean [not null, default: true]
+  videoOnEntry Boolean [not null, default: true]
+  tokenType TokenType
+  chain Chain
+  contractAddress String
+  conditionType ConditionType
+  conditionValue String
+  experience Experience [not null]
+  experianceId Int [unique, not null]
+}
+
+Table RecordingMetadata {
+  id Int [pk, increment]
+  chain Chain
+  tokenType TokenType
+  contractAddress String
+  experience Experience [not null]
+  experianceId Int [unique, not null]
+}
+
+Table Recording {
+  id Int [pk, increment]
+  dateRecorded DateTime [not null]
+  url String
+  recTitle String [not null]
+  recDescription String [not null]
+  Experience Experience [not null]
+  experienceId Int [not null]
+}
+
+Table ExperianceStats {
+  id Int [pk, increment]
+  experianceStatus ExperianceStatus [not null, default: 'FINISHED']
+  totalRatings Int [not null, default: 0]
+  overallRating Int [not null, default: 0]
+  lastMeet DateTime
+  experience Experience [not null]
+  experienceId Int [unique, not null]
+}
+
+Enum ExperianceStatus {
+  ONGOING
+  FINISHED
+}
+
+Enum Chain {
+  ETHEREUM
+  COSMOS
+  SOLANA
+  TEZOS
+  BSC
+}
+
+Enum TokenType {
+  ERC20
+  ERC721
+  ERC1155
+  SPL
+  BEP20
+}
+
+Enum ConditionType {
+  FOLLOW_HANDLE
+  HAVE_HANDLE
+}
+
+Ref: Experience.userId > User.id
+
+Ref: RoomConfig.experianceId - Experience.id
+
+Ref: RecordingMetadata.experianceId - Experience.id
+
+Ref: Recording.experienceId > Experience.id
+
+Ref: ExperianceStats.experienceId - Experience.id

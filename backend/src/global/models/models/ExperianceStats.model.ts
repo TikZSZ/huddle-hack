@@ -25,5 +25,9 @@ export class ExperianceStats {
     lastMeet?: Date;
 
     @IsDefined()
-    Experience!: Experience[];
+    experience!: Experience;
+
+    @IsDefined()
+    @IsInt()
+    experienceId!: number;
 }

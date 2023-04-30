@@ -22,5 +22,8 @@ export class User {
     roomConfigs!: RoomConfig[];
 
     @IsDefined()
-    Experience!: Experience[];
+    hostedExperiances!: Experience[];
+
+    @IsDefined()
+    sharedExperiances!: Experience[];
 }

@@ -21,5 +21,9 @@ export class RecordingMetadata {
     contractAddress?: string;
 
     @IsDefined()
-    Experience!: Experience[];
+    experience!: Experience;
+
+    @IsDefined()
+    @IsInt()
+    experianceId!: number;
 }

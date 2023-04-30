@@ -38,8 +38,8 @@ function submitData(e:Event){
       <label for="participantsAllowed">Participants Allowed:</label>
       <input type="text" id="participantsAllowed" name="participantsAllowed" placeholder="Enter participants allowed">
 
-      <label for="currentParticipants">Current Participants:</label>
-      <input type="text" id="currentParticipants" name="currentParticipants" placeholder="Enter current participants">
+      <!-- <label for="currentParticipants">Current Participants:</label>
+      <input type="text" id="currentParticipants" name="currentParticipants" placeholder="Enter current participants"> -->
 
       <!-- <label for="roomId">Room ID:</label>
       <input type="number" id="roomId" name="roomId" placeholder="Enter room ID"> -->

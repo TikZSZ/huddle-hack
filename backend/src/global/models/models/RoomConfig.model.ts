@@ -60,5 +60,9 @@ export class RoomConfig {
     conditionValue?: string;
 
     @IsDefined()
-    Experience!: Experience[];
+    experience!: Experience;
+
+    @IsDefined()
+    @IsInt()
+    experianceId!: number;
 }

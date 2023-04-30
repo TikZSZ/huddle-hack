@@ -2,7 +2,7 @@
 import { RouterLink, RouterView } from 'vue-router'
 import AccountIcon from './components/account-icon.vue';
 import useStore from "@/stores/store"
-import {BrowserProvider,keccak256,getBytes,toUtf8Bytes} from "ethers"
+import {BrowserProvider,getBytes,toUtf8Bytes} from "ethers"
 import { onMounted, ref } from 'vue';
 import {getNonce,loginUser} from "@/utils/api"
 const store = useStore()

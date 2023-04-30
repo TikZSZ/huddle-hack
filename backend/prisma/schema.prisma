@@ -10,39 +10,43 @@ generator client {
 //   output   = "../src/global/models"
 // }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id          Int          @id @default(autoincrement())
-  ethAddress  String       @unique
-  email       String?      @unique
-  nonce String
-  roomConfigs RoomConfig[]
-  Experience  Experience[]
+  id                Int          @id @default(autoincrement())
+  ethAddress        String       @unique
+  email             String?      @unique
+  nonce             String
+  roomConfigs       RoomConfig[]
+  hostedExperiances Experience[]
+  sharedExperiances Experience[] @relation(name: "shared_experiances")
 }
 
 model Experience {
-  id                  Int               @id @default(autoincrement())
+  id                  Int                @id @default(autoincrement())
   expTitle            String
   expDescription      String?
   participantsAllowed Int
   currentParticipants Int
   roomId              Int
-  timeCreated         DateTime
+  roomCreationTime    DateTime
   tokenGatedRoom      Boolean
   tokenGatedRecording Boolean
-  user                User              @relation(fields: [userId], references: [id])
-  roomConfig          RoomConfig        @relation(fields: [roomConfigId], references: [id])
-  recordingMetadata   RecordingMetadata @relation(fields: [recordingMetadataId], references: [id])
-  recordings          Recording[]
-  experianceStats     ExperianceStats   @relation(fields: [experianceStatsId], references: [id])
   userId              Int
-  roomConfigId        Int
-  recordingMetadataId Int
-  experianceStatsId   Int
+  user                User               @relation(fields: [userId], references: [id])
+  hosts               User[]             @relation(name: "shared_experiances")
+  roomConfig          RoomConfig?
+  recordingMetadata   RecordingMetadata?
+  recordings          Recording[]
+  experianceStats     ExperianceStats?
 }
 
 model RoomConfig {
@@ -62,25 +66,27 @@ model RoomConfig {
   contractAddress String?
   conditionType   ConditionType?
   conditionValue  String?
-  Experience      Experience[]
+  experience      Experience     @relation(fields: [experianceId], references: [id])
+  experianceId    Int            @unique
 }
 
 model RecordingMetadata {
-  id              Int          @id @default(autoincrement())
+  id              Int        @id @default(autoincrement())
   chain           Chain?
   tokenType       TokenType?
   contractAddress String?
-  Experience      Experience[]
+  experience      Experience @relation(fields: [experianceId], references: [id])
+  experianceId    Int        @unique
 }
 
 model Recording {
-  id             Int         @id @default(autoincrement())
+  id             Int        @id @default(autoincrement())
   dateRecorded   DateTime
   url            String?
   recTitle       String
   recDescription String
-  Experience     Experience? @relation(fields: [experienceId], references: [id])
-  experienceId   Int?
+  Experience     Experience @relation(fields: [experienceId], references: [id])
+  experienceId   Int
 }
 
 model ExperianceStats {
@@ -89,7 +95,8 @@ model ExperianceStats {
   totalRatings     Int              @default(0)
   overallRating    Int              @default(0)
   lastMeet         DateTime?
-  Experience       Experience[]
+  experience       Experience       @relation(fields: [experienceId], references: [id])
+  experienceId     Int              @unique
 }
 
 enum ExperianceStatus {

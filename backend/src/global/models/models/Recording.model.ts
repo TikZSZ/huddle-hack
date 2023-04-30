@@ -22,10 +22,10 @@ export class Recording {
     @IsString()
     recDescription!: string;
 
-    @IsOptional()
-    Experience?: Experience;
+    @IsDefined()
+    Experience!: Experience;
 
-    @IsOptional()
+    @IsDefined()
     @IsInt()
-    experienceId?: number;
+    experienceId!: number;
 }

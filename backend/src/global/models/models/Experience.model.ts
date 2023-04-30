@@ -28,7 +28,7 @@ export class Experience {
 
     @IsDefined()
     @IsDate()
-    timeCreated!: Date;
+    roomCreationTime!: Date;
 
     @IsDefined()
     @IsBoolean()
@@ -39,33 +39,24 @@ export class Experience {
     tokenGatedRecording!: boolean;
 
     @IsDefined()
-    user!: User;
-
-    @IsDefined()
-    roomConfig!: RoomConfig;
-
-    @IsDefined()
-    recordingMetadata!: RecordingMetadata;
-
-    @IsDefined()
-    recordings!: Recording[];
-
-    @IsDefined()
-    experianceStats!: ExperianceStats;
-
-    @IsDefined()
     @IsInt()
     userId!: number;
 
     @IsDefined()
-    @IsInt()
-    roomConfigId!: number;
+    user!: User;
 
     @IsDefined()
-    @IsInt()
-    recordingMetadataId!: number;
+    hosts!: User[];
+
+    @IsOptional()
+    roomConfig?: RoomConfig;
+
+    @IsOptional()
+    recordingMetadata?: RecordingMetadata;
 
     @IsDefined()
-    @IsInt()
-    experianceStatsId!: number;
+    recordings!: Recording[];
+
+    @IsOptional()
+    experianceStats?: ExperianceStats;
 }
