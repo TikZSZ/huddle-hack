@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 @Controller('users')
 export class UsersController {
   constructor (private prisma:PrismaService, private jwtService: JwtService){}
+  
   @Get("exists")
   async userExists(@Query("ethAddress") ethAddress:string){
     const user = await this.prisma.user.findUnique({where:{ethAddress}})

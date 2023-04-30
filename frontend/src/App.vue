@@ -3,26 +3,28 @@ import { RouterLink, RouterView } from 'vue-router'
 import AccountIcon from './components/account-icon.vue';
 import useStore from "@/stores/store"
 import {BrowserProvider,keccak256,getBytes,toUtf8Bytes} from "ethers"
-import { bufferToHex } from 'ethereumjs-util';
 import { ref } from 'vue';
-
+import {userExsists} from "@/utils/api"
 const store = useStore()
 
 const metaMaskButtonText = ref("Log in with Metamask")
 const metaMaskLoginDisabled = ref(false)
+
+
 async function handleMetamaskLogin() {
+  
   try {
-    console.log("hello world");
-    
     if (!window.ethereum) {
-      console.log("Metamask wallet not detected"!);
-      
-      metaMaskLoginDisabled.value = true
-      throw new Error("Metamask wallet not detected!")
+      const error = "Metamask wallet not detected!"
+      metaMaskButtonText.value = error
+      throw new Error(error)
     }
     const provider = new BrowserProvider(window.ethereum)
+    await provider.send("eth_requestAccounts", [])
+    
     const accounts = await provider.listAccounts()
     const account = accounts[0];
+    const userExists = await userExsists(account.address)
     const message = "some message";
     let dataHash = keccak256(
       toUtf8Bytes(JSON.stringify(message))
@@ -30,11 +32,11 @@ async function handleMetamaskLogin() {
     const dataHashBin = getBytes(dataHash)
     const signature = await account.signMessage(dataHashBin)
     const data = { message, signature };
-    console.log(data);
+    
     
   } catch (err) {
     console.error('Failed to log in with Metamask', err);
-    metaMaskButtonText.value = (err as Error).message
+    metaMaskLoginDisabled.value = true
   }
 }
 </script>
@@ -155,10 +157,6 @@ header {
     text-decoration: none;
     display: inline-block;
     transition: background-color 0.3s;
-  }
-
-  .login-button:hover {
-    background-color: #3e8e41;
   }
 
 
