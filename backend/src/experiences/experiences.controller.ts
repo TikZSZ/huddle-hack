@@ -20,7 +20,7 @@ export class ExperiencesController
   @Get( "/:experianceId" )
   getExperince ( @Param( "experianceId",new ParseIntPipe() ) experianceId: number )
   {
-    return this.prisma.experience.findFirst( { include: { experianceStats: true, hosts: true,recordingMetadata:true,roomConfig:true ,recordings:true,}, where: { id: experianceId } } )
+    return this.prisma.experience.findFirst( { include: { experianceStats: true, hosts: true,recordingMetadata:true,roomConfig:true,owner:true ,recordings:true,}, where: { id: experianceId } } )
   }
 
   @Get( "/:experianceId/recordings" )

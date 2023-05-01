@@ -14,6 +14,8 @@ export default defineStore('counter', () => {
 
   const user = ref<User|null>(null)
 
+  const walletConnected = ref(false)
+
   function isLoggedIn(){
     return !!user.value && !!user.value.id
   }
@@ -31,5 +33,9 @@ export default defineStore('counter', () => {
     }
   }
 
-  return { count, doubleCount, increment,isLoggedIn,user,loginUser,sVerifyUser }
+  function updateWalletConnectionStatus(val:boolean){
+    walletConnected.value = val
+  }
+
+  return { count, doubleCount, increment,isLoggedIn,user,loginUser,sVerifyUser, walletConnected,updateWalletConnectionStatus }
 })

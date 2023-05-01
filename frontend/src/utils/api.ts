@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { User } from "./types"
+import type { Experience, Experiences, User } from "./types"
 
 const baseURL = "http://localhost:5000"
 const api = axios.create({
@@ -21,4 +21,14 @@ export async function loginUser(ethAddress:string,data:{nonce:string,signature:s
 export async function verifyUser(){
   const {data:resp} = await api.post<User>(`/users/verifyUser`)
   return resp
+}
+
+export async function getExperiences(){
+  const {data} = await api.get<Experiences>(`/experiences`)
+  return data
+}
+
+export async function getExperience(expId:number){
+  const {data} = await api.get<Experience>(`/experiences/${expId}`)
+  return data
 }
