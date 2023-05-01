@@ -11,6 +11,11 @@ import { Request } from 'express';
 export class UsersController {
   constructor (private prisma:PrismaService, private jwtService: JwtService,private userService:UsersService){}
   
+  @Get()
+  getUsers(){
+    return this.prisma.user.findMany()
+  }
+
   @Get("/:ethAddress/nonce")
   async userExists(@Param("ethAddress") ethAddress:string){
     let user = await this.prisma.user.findUnique({where:{ethAddress}})

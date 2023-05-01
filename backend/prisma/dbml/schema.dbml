@@ -16,10 +16,9 @@ Table Experience {
   id Int [pk, increment]
   expTitle String [not null]
   expDescription String
-  participantsAllowed Int [not null]
-  currentParticipants Int [not null]
-  roomId Int [not null]
-  roomCreationTime DateTime [not null]
+  participantsAllowed Int
+  roomId String
+  roomCreationTime DateTime
   tokenGatedRoom Boolean [not null]
   tokenGatedRecording Boolean [not null]
   ownerId Int [not null]
@@ -35,8 +34,8 @@ Table RoomConfig {
   id Int [pk, increment]
   roomTitle String [not null]
   roomDescription String
-  startTime DateTime
-  expiryTime DateTime
+  startTime DateTime [not null]
+  expiryTime DateTime [not null]
   hostWallets User [not null]
   roomLocked Boolean [not null, default: true]
   muteOnEntry Boolean [not null, default: true]
@@ -73,9 +72,9 @@ Table ExperianceStats {
   id Int [pk, increment]
   experianceStatus ExperianceStatus [not null, default: 'FINISHED']
   totalRatings Int [not null, default: 0]
-  overallRating Int [not null, default: 0]
-  startTime DateTime
-  expiryTime DateTime
+  overallRating Int [not null, default: 5]
+  startTime DateTime [not null]
+  expiryTime DateTime [not null]
   lastMeet DateTime
   experience Experience [not null]
   experienceId Int [unique, not null]

@@ -5,15 +5,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// generator dto {
-//   provider = "prisma-class-validator-generator"
-//   output   = "../src/global/models"
-// }
 
 generator dbml {
   provider = "prisma-dbml-generator"
 }
 
+// generator dto {
+//   provider = "prisma-class-validator-generator"
+//   output   = "../src/global/models"
+// }
 
 datasource db {
   provider = "postgresql"
@@ -34,10 +34,9 @@ model Experience {
   id                  Int                @id @default(autoincrement())
   expTitle            String
   expDescription      String?
-  participantsAllowed Int
-  currentParticipants Int
-  roomId              Int
-  roomCreationTime    DateTime
+  participantsAllowed Int?
+  roomId              String?
+  roomCreationTime    DateTime?
   tokenGatedRoom      Boolean
   tokenGatedRecording Boolean
   ownerId              Int
@@ -53,8 +52,8 @@ model RoomConfig {
   id              Int       @id @default(autoincrement())
   roomTitle       String
   roomDescription String?
-  startTime       DateTime?
-  expiryTime      DateTime?
+  startTime       DateTime
+  expiryTime      DateTime
   hostWallets     User[]
   roomLocked      Boolean   @default(true)
   muteOnEntry     Boolean   @default(true)
@@ -93,9 +92,9 @@ model ExperianceStats {
   id               Int              @id @default(autoincrement())
   experianceStatus ExperianceStatus @default(FINISHED)
   totalRatings     Int              @default(0)
-  overallRating    Int              @default(0)
-  startTime       DateTime?
-  expiryTime      DateTime?
+  overallRating    Int              @default(5)
+  startTime       DateTime
+  expiryTime      DateTime
   lastMeet         DateTime?
   experience       Experience       @relation(fields: [experienceId], references: [id])
   experienceId     Int              @unique

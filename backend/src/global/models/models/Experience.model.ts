@@ -14,21 +14,17 @@ export class Experience {
     @IsString()
     expDescription?: string;
 
-    @IsDefined()
+    @IsOptional()
     @IsInt()
-    participantsAllowed!: number;
+    participantsAllowed?: number;
 
-    @IsDefined()
-    @IsInt()
-    currentParticipants!: number;
+    @IsOptional()
+    @IsString()
+    roomId?: string;
 
-    @IsDefined()
-    @IsInt()
-    roomId!: number;
-
-    @IsDefined()
+    @IsOptional()
     @IsDate()
-    roomCreationTime!: Date;
+    roomCreationTime?: Date;
 
     @IsDefined()
     @IsBoolean()
@@ -40,10 +36,10 @@ export class Experience {
 
     @IsDefined()
     @IsInt()
-    userId!: number;
+    ownerId!: number;
 
     @IsDefined()
-    user!: User;
+    owner!: User;
 
     @IsDefined()
     hosts!: User[];

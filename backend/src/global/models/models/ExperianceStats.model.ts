@@ -22,6 +22,14 @@ export class ExperianceStats {
 
     @IsOptional()
     @IsDate()
+    startTime?: Date;
+
+    @IsOptional()
+    @IsDate()
+    expiryTime?: Date;
+
+    @IsOptional()
+    @IsDate()
     lastMeet?: Date;
 
     @IsDefined()
