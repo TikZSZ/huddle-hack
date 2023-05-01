@@ -5,6 +5,7 @@ import { PrismaService } from './prisma.service';
 import { UsersModule } from './users/users.module';
 import session from "cookie-session"
 import { AuthMiddleWare } from './global/middlewares/auth.middleware';
+import { ExperiencesModule } from './experiences/experiences.module';
 
 const secret = process.env.SECRET || 'asdf';
 const isProd = process.env.NODE_ENV === 'production';
@@ -29,7 +30,7 @@ const CookieDevConfig = {
 @Module({
   imports: [DevtoolsModule.register({
     http: process.env.NODE_ENV !== 'production',
-  }), UsersModule,],
+  }), UsersModule, ExperiencesModule,],
   controllers: [AppController],
   providers: [PrismaService],
 })

@@ -74,6 +74,8 @@ Table ExperianceStats {
   experianceStatus ExperianceStatus [not null, default: 'FINISHED']
   totalRatings Int [not null, default: 0]
   overallRating Int [not null, default: 0]
+  startTime DateTime
+  expiryTime DateTime
   lastMeet DateTime
   experience Experience [not null]
   experienceId Int [unique, not null]

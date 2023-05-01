@@ -94,6 +94,8 @@ model ExperianceStats {
   experianceStatus ExperianceStatus @default(FINISHED)
   totalRatings     Int              @default(0)
   overallRating    Int              @default(0)
+  startTime       DateTime?
+  expiryTime      DateTime?
   lastMeet         DateTime?
   experience       Experience       @relation(fields: [experienceId], references: [id])
   experienceId     Int              @unique
