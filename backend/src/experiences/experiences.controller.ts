@@ -23,16 +23,36 @@ export class ExperiencesController
     return this.prisma.experience.findFirst( { include: { experianceStats: true, hosts: true, recordingMetadata: true, roomConfig: true, owner: true, recordings: true, }, where: { id: experienceId } } )
   }
 
-  @Get( "/:experienceId/recordings" )
-  getRecordings ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
-  {
-    return this.prisma.recording.findMany( { where: { experienceId }, select: { dateRecorded: true, recTitle: true, recDescription: true, } } )
-  }
-
   @Get( "/:experienceId/roomConfig" )
   getRoomConfig ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
   {
     return this.prisma.experience.findFirst( { where: { id: experienceId }, select: { roomConfig: true } } )
+  }
+
+  @Get( "/:experienceId/recordings" )
+  getRecordings ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
+  {
+    return this.prisma.recording.findMany( { where: { experienceId }, select: { recTitle: true, recDescription: true,  dateRecorded: true} } )
+  }
+
+  @Get( "/:experienceId/recordings/:recordId" )
+  async getRecording ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number,@Param( "recordId", new ParseIntPipe() ) recordId: number )
+  {
+    const recMetadata = await this.prisma.recordingMetadata.findUnique({where:{experienceId:experienceId}})
+    if(!recMetadata) throw new BadRequestException()
+
+    const recording = await this.prisma.recording.findUnique({where:{id:recordId}})
+    if(!recording) throw new NotFoundException()
+
+    if(!recMetadata.tokenGatedRecording){
+      return {recMetadata,recording}
+    }
+    if(recMetadata.tokenType !== "REC20") { 
+      // backend checks and then return url for download
+      return {recMetadata,recording}
+    }
+    if(!recording.recContractId) throw new NotFoundException()
+    return {recMetadata,recording:null,recContractId:recording!.recContractId}
   }
 
   @Patch( "/:experienceId/stats" )

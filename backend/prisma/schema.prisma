@@ -64,8 +64,8 @@ model RoomConfig {
   contractAddress String?
   conditionType   ConditionType?
   conditionValue  String?
-  experience      Experience     @relation(fields: [experianceId], references: [id])
-  experianceId    Int            @unique
+  experience      Experience     @relation(fields: [experienceId], references: [id])
+  experienceId    Int            @unique
 }
 
 model RecordingMetadata {
@@ -74,8 +74,8 @@ model RecordingMetadata {
   tokenType           TokenType?
   contractAddress     String?
   tokenGatedRecording Boolean
-  experience          Experience @relation(fields: [experianceId], references: [id])
-  experianceId        Int        @unique
+  experience          Experience @relation(fields: [experienceId], references: [id])
+  experienceId        Int        @unique
 }
 
 model Recording {

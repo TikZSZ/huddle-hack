@@ -46,7 +46,7 @@ Table RoomConfig {
   conditionType ConditionType
   conditionValue String
   experience Experience [not null]
-  experianceId Int [unique, not null]
+  experienceId Int [unique, not null]
 }
 
 Table RecordingMetadata {
@@ -56,7 +56,7 @@ Table RecordingMetadata {
   contractAddress String
   tokenGatedRecording Boolean [not null]
   experience Experience [not null]
-  experianceId Int [unique, not null]
+  experienceId Int [unique, not null]
 }
 
 Table Recording {
@@ -112,9 +112,9 @@ Enum ConditionType {
 
 Ref: Experience.ownerId > User.id
 
-Ref: RoomConfig.experianceId - Experience.id
+Ref: RoomConfig.experienceId - Experience.id
 
-Ref: RecordingMetadata.experianceId - Experience.id
+Ref: RecordingMetadata.experienceId - Experience.id
 
 Ref: Recording.experienceId > Experience.id
 
