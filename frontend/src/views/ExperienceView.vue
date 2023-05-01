@@ -2,7 +2,7 @@
 import { getExperience } from '@/utils/api';
 import type { Experience } from '@/utils/types';
 import { onMounted, ref, type Ref } from 'vue';
-import {useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import useStore from "@/stores/store"
 
 const store = useStore()
@@ -10,7 +10,7 @@ const route = useRoute()
 console.log( route.params );
 const id = route.params.id
 
-const experience:Ref<Experience> = ref( {
+const experience: Ref<Experience> = ref( {
   "id": 1,
   "expTitle": "Beta Experiance",
   "expDescription": "Welcome to the Future of Social Media",
@@ -40,10 +40,11 @@ const experience:Ref<Experience> = ref( {
   ],
 } )
 
-onMounted(async () => {
-  const exp = await getExperience(parseInt(id as string))
+onMounted( async () =>
+{
+  const exp = await getExperience( parseInt( id as string ) )
   experience.value = exp
-})
+} )
 
 </script>
 
@@ -52,12 +53,12 @@ onMounted(async () => {
     <header>
       <div class="header-content">
         <div class="header-flex">
-          <div class="header-flex">
+          <div class="experience-header-flex">
             <img src="/chat-room.jpg" alt="Experience Image" class="header-image">
-          <div class="header-text">
-            <h1>{{ experience.expTitle }}</h1>
-            <p>{{ experience.expDescription }}</p>
-          </div>
+            <div class="header-text">
+              <h1>{{ experience.expTitle }}</h1>
+              <p>{{ experience.expDescription }}</p>
+            </div>
           </div>
           <section class="experience-stats">
             <div class="stats-content">
@@ -108,7 +109,7 @@ onMounted(async () => {
     </header>
 
     <div class="section-parent">
-              <!-- <div class="host-buttons">
+      <!-- <div class="host-buttons">
         <button v-if="!roomInfo" class="create-room" @click="createRoom">Create Room</button>
         <button v-if="roomInfo && !isHost" class="join-room" @click="joinRoom">Join Room</button>
         <button v-if="roomInfo && isHost" class="end-room" @click="endRoom">End Room</button>
@@ -122,12 +123,43 @@ onMounted(async () => {
       <section class="hosts">
         <h2>Hosts</h2>
         <div class="hosts-content">
-          <div v-for="host in [...experience.hosts,experience.hosts[0]]" :key="host.id" class="host">
+          <div v-for="host in [ ...experience.hosts, experience.hosts[ 0 ] ]" :key="host.id" class="host">
             <div class="host-info">
               <img src="/chat-room.jpg" alt="Host Image" class="host-image">
-              <p class="host-address" :style="{color: store.user?.ethAddress === host.ethAddress? 'hsla(160, 100%, 37%, 1)':'#6b7280'}" >{{ host.ethAddress.substring( 0, 10 ) }}...</p>
+              <p class="host-address"
+                :style="{ color: store.user?.ethAddress === host.ethAddress ? 'hsla(160, 100%, 37%, 1)' : '#6b7280' }">{{
+                  host.ethAddress.substring( 0, 10 ) }}...</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="recordings">
+        <h2>Recordings</h2>
+        <div class="recording-cards">
+          <div class="recording-card">
+            <div class="recording-info">
+              <h3 class="rec-title">Recording Title</h3>
+              <p class="rec-description">Recording description goes here. Lorem ipsum dolor sit amet, consectetur
+                adipiscing elit.</p>
+              <p class="rec-date">Recorded on May 1, 2023</p>
+            </div>
+            <div class="recording-actions">
+              <button class="download-btn">Download</button>
+            </div>
+          </div>
+          <div class="recording-card">
+            <div class="recording-info">
+              <h3 class="rec-title">Recording Title</h3>
+              <p class="rec-description">Recording description goes here. Lorem ipsum dolor sit amet, consectetur
+                adipiscing elit.</p>
+              <p class="rec-date">Recorded on April 30, 2023</p>
+            </div>
+            <div class="recording-actions">
+              <button class="download-btn">Download</button>
+            </div>
+          </div>
+          <!-- Add more recording cards here -->
         </div>
       </section>
 
@@ -165,10 +197,20 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   column-gap: 20px;
-  padding: 30px;
+  padding: 25px;
   background-color: var(--color-background-mute);
   border-radius: 20px 20px 0 0px;
-  justify-content: space-between;
+  justify-content: space-evenly;
+}
+
+.experience-header-flex {
+  display: flex;
+  align-items: center;
+  column-gap: 20px;
+  padding: 25px;
+  background-color: var(--color-background-mute);
+  border-radius: 20px 20px 0 0px;
+  justify-content: space-evenly;
 }
 
 .header-image {
@@ -176,130 +218,15 @@ onMounted(async () => {
   border-radius: 50%;
 }
 
-.header-text {
-  margin-left: 30px;
-  font-size: 35px;
+.header-text h1 {
+  font-size: 40px;
 }
+
+.header-text p {
+  font-size: 20px;
+}
+
 /* Stats Section */
-.section-parent {
-  background-color: var(--color-background);
-  border-radius: 0 0 20px 20px;
-  padding: 30px;
-}
-
-
-/* Hosts Section */
-.hosts {
-  padding: 50px 0;
-  text-align: center;
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
-}
-.hosts-content{
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-}
-
-.hosts h2 {
-  margin-bottom: 30px;
-  font-size: 2.5rem;
-}
-
-.host {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.host-info {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  overflow: hidden;
-  position: relative;
-}
-
-.host-address {
-  width: 200px;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.8);
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  margin: 0;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  text-align: center;
-}
-
-.host-image {
-  width: 100%;
-  height: auto;
-}
-
-.host-name {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.8);
-  color: white;
-  font-weight: bold;
-  text-align: center;
-}
-
-.host-buttons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-button {
-  padding: 10px 20px;
-  border-radius: 50px;
-  border: none;
-  color: white;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-.create-room {
-  background-color: hsla(160, 100%, 37%, 1);
-}
-
-.create-room:hover {
-  background-color: hsla(160, 100%, 47%, 1);
-}
-
-.join-room {
-  background-color: hsla(160, 100%, 37%, 1);
-  color: white;
-  border: 2px solid hsla(160, 100%, 37%, 1);
-}
-
-.join-room:hover {
-  background-color: hsla(160, 100%, 47%, 1);
-}
-
-.end-room {
-  background-color: hsla(0, 100%, 50%, 1);
-}
-
-.end-room:hover {
-  background-color: hsla(0, 100%, 60%, 1);
-}
-
 /* Room Section */
 
 .rating {
@@ -353,34 +280,229 @@ button {
   margin-left: 5px;
 }
 
-@media screen and (max-width: 1140px) {
-.header-flex {
-flex-wrap: wrap;
-justify-content: center;
-text-align: center;
+
+.section-parent {
+  background-color: var(--color-background);
+  border-radius: 0 0 20px 20px;
+  padding: 30px;
+}
+
+/* Buttons Section */
+.host-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.create-room {
+  background-color: hsla(160, 100%, 37%, 1);
+}
+
+.create-room:hover {
+  background-color: hsla(160, 100%, 47%, 1);
+}
+
+.join-room {
+  background-color: hsla(160, 100%, 37%, 1);
+  color: white;
+  border: 2px solid hsla(160, 100%, 37%, 1);
+}
+
+.join-room:hover {
+  background-color: hsla(160, 100%, 47%, 1);
+}
+
+.end-room {
+  background-color: hsla(0, 100%, 50%, 1);
+}
+
+.end-room:hover {
+  background-color: hsla(0, 100%, 60%, 1);
+}
+
+
+/* Hosts Section */
+.hosts {
+  padding: 50px 0 25px 0;
+  text-align: center;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
 }
 
 .hosts-content {
-flex-wrap: wrap;
-justify-content: center;
-text-align: center;
-column-gap: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
 }
 
-.header-flex > div {
-flex-basis: 100%;
-margin-bottom: 20px;
+.hosts h2 {
+  margin-bottom: 30px;
+  font-size: 2.5rem;
 }
 
-.header-text {
-margin: 20px 0;
-font-size: 25px;
+.host {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
-.header-image {
-max-width: 150px;
-margin-bottom: 20px;
+.host-info {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
 }
+
+.host-address {
+  width: 120px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  text-align: center;
+}
+
+.host-image {
+  width: 100%;
+  height: auto;
+}
+
+
+
+/* Records Section */
+.recordings {
+  padding: 20px;
+}
+
+.recording-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.recordings h2 {
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.recording-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: var(--color-background-soft);
+  transition: box-shadow 0.3s ease-in-out;
+  outline: none;
+}
+
+.recording-card:hover {
+  outline: none;
+}
+
+.recording-info {
+  width: 80%;
+}
+
+.rec-title {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: hsla(160, 100%, 37%, 1);
+}
+
+.rec-description {
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 80%;
+  color: var(--color-text);
+}
+
+
+.rec-date {
+  color: rgb(107, 114, 128);
+}
+
+.recording-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.download-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: hsla(160, 100%, 37%, 1);
+  color: var(--vt-c-white);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.download-btn:hover {
+  background-color: var(--vt-c-black-mute);
+}
+
+@media screen and (max-width: 1140px) {
+  .header-flex {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .experience-header-flex {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+
+  .hosts-content {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    column-gap: 20px;
+  }
+
+  .header-flex>div {
+    flex-basis: 100%;
+    margin-bottom: 20px;
+  }
+
+  .header-text {
+    margin: 20px 0;
+    font-size: 25px;
+  }
+
+  .header-image {
+    max-width: 150px;
+    margin-bottom: 20px;
+  }
 }
 
 /* Feedback section */
@@ -437,6 +559,4 @@ margin-bottom: 20px;
 
 .feedback button[type="submit"]:hover {
   background-color: #00796b;
-}
-
-</style>
+}</style>
