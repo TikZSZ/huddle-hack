@@ -17,38 +17,38 @@ export class ExperiencesController
     return this.prisma.experience.findMany( { orderBy: { id: "desc" }, include: { experianceStats: true, hosts: true, owner: true } } )
   }
 
-  @Get( "/:experianceId" )
-  getExperince ( @Param( "experianceId",new ParseIntPipe() ) experianceId: number )
+  @Get( "/:experienceId" )
+  getExperince ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
   {
-    return this.prisma.experience.findFirst( { include: { experianceStats: true, hosts: true,recordingMetadata:true,roomConfig:true,owner:true ,recordings:true,}, where: { id: experianceId } } )
+    return this.prisma.experience.findFirst( { include: { experianceStats: true, hosts: true, recordingMetadata: true, roomConfig: true, owner: true, recordings: true, }, where: { id: experienceId } } )
   }
 
-  @Get( "/:experianceId/recordings" )
-  getRecordings ( @Param( "experianceId",new ParseIntPipe() ) experianceId: number )
+  @Get( "/:experienceId/recordings" )
+  getRecordings ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
   {
-    return this.prisma.experience.findFirst( { include: { recordings: true }, where: { id: experianceId } } )
+    return this.prisma.recording.findMany( { where: { experienceId }, select: { dateRecorded: true, recTitle: true, recDescription: true, } } )
   }
 
-  @Get( "/:experianceId/roomConfig" )
-  getRoomConfig ( @Param( "experianceId",new ParseIntPipe() ) experianceId: number )
+  @Get( "/:experienceId/roomConfig" )
+  getRoomConfig ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
   {
-    return this.prisma.experience.findFirst( { where: { id: experianceId },select:{roomConfig:true} } )
+    return this.prisma.experience.findFirst( { where: { id: experienceId }, select: { roomConfig: true } } )
   }
 
-  @Patch( "/:experianceId/stats" )
+  @Patch( "/:experienceId/stats" )
   @UseGuards( AuthGuard )
-  updateExpStats ( @Param( "experianceId",new ParseIntPipe() ) experianceId: number, @GetJwtToken() jwtToken: JwtToken )
+  updateExpStats ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @GetJwtToken() jwtToken: JwtToken )
   {
-    return this.prisma.experianceStats.update( { where: { id: experianceId }, data: {} } )
+    return this.prisma.experianceStats.update( { where: { id: experienceId }, data: {} } )
   }
 
-  @Patch( "/:experianceId/initMeet" )
+  @Patch( "/:experienceId/initMeet" )
   @UseGuards( AuthGuard )
-  initMeet ( @Body() data: InitMeetDTO, @Param( "experianceId",new ParseIntPipe() ) experianceId: number, @GetJwtToken() jwtToken: JwtToken )
+  initMeet ( @Body() data: InitMeetDTO, @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @GetJwtToken() jwtToken: JwtToken )
   {
     const userId = jwtToken.userId
     return this.prisma.experience.update( {
-      where: { id: experianceId }, data: {
+      where: { id: experienceId }, data: {
         roomId: data.roomId,
         experianceStats: { update: { experianceStatus: data.experianceStatus } },
         roomCreationTime: ( new Date() ).toISOString()
@@ -64,26 +64,44 @@ export class ExperiencesController
     const user = await this.prisma.user.findUnique( { where: { id: userId } } )
     const { roomConfig, recordingMetadata, startTime, expiryTime, hosts, ...rest } = data
     if ( !user ) throw new BadRequestException()
-    let verifiedHosts: { ethAddress: string }[] = [ { ethAddress: user.ethAddress } ]
+    let verifiedHosts: {
+      where: { ethAddress: string },
+      create: {
+        ethAddress: string,
+        nonce: string
+      }
+    }[] = [ { where:{ethAddress: user.ethAddress},create:{ethAddress:user.ethAddress,nonce:""} } ]
     if ( hosts.length > 0 )
     {
       hosts.map( ( hostAddress ) =>
       {
         verifiedHosts.push( {
-          ethAddress: hostAddress
+          where:{ethAddress:hostAddress},
+          create:{
+            ethAddress:hostAddress,
+            nonce:""
+          }
         } )
       } )
     }
     return this.prisma.experience.create( {
       data: {
         ...rest,
-        hosts: { connect: [ ...verifiedHosts ] },
+        hosts: {
+          connectOrCreate: {
+            where: { ethAddress: "" },
+            create: {
+              ethAddress: "",
+              nonce: ""
+            }
+          }
+        },
         experianceStats: { create: { startTime, expiryTime, experianceStatus: ExperianceStatus.FINISHED } },
-        recordingMetadata: { create: recordingMetadata },
+        recordingMetadata: { create: { ...recordingMetadata, tokenGatedRecording: rest.tokenGatedRecording } },
         roomConfig: {
           create: {
             ...roomConfig, startTime, expiryTime, roomTitle: rest.expTitle, roomDescription: rest.expDescription,
-            hostWallets: { connect: verifiedHosts }
+            hostWallets: { connectOrCreate: verifiedHosts }
           }
         },
         ownerId: userId

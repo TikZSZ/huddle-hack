@@ -54,6 +54,7 @@ Table RecordingMetadata {
   chain Chain
   tokenType TokenType
   contractAddress String
+  tokenGatedRecording Boolean [not null]
   experience Experience [not null]
   experianceId Int [unique, not null]
 }
@@ -66,6 +67,7 @@ Table Recording {
   recDescription String [not null]
   Experience Experience [not null]
   experienceId Int [not null]
+  recContractId Int
 }
 
 Table ExperianceStats {
@@ -91,6 +93,7 @@ Enum Chain {
   SOLANA
   TEZOS
   BSC
+  FILECOIN_HYPERSPACE
 }
 
 Enum TokenType {
@@ -99,6 +102,7 @@ Enum TokenType {
   ERC1155
   SPL
   BEP20
+  REC20
 }
 
 Enum ConditionType {

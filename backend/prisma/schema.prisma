@@ -5,7 +5,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 generator dbml {
   provider = "prisma-dbml-generator"
 }
@@ -39,8 +38,8 @@ model Experience {
   roomCreationTime    DateTime?
   tokenGatedRoom      Boolean
   tokenGatedRecording Boolean
-  ownerId              Int
-  owner                User               @relation(fields: [ownerId], references: [id])
+  ownerId             Int
+  owner               User               @relation(fields: [ownerId], references: [id])
   hosts               User[]             @relation(name: "shared_experiances")
   roomConfig          RoomConfig?
   recordingMetadata   RecordingMetadata?
@@ -49,15 +48,15 @@ model Experience {
 }
 
 model RoomConfig {
-  id              Int       @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   roomTitle       String
   roomDescription String?
   startTime       DateTime
   expiryTime      DateTime
   hostWallets     User[]
-  roomLocked      Boolean   @default(true)
-  muteOnEntry     Boolean   @default(true)
-  videoOnEntry    Boolean   @default(true)
+  roomLocked      Boolean  @default(true)
+  muteOnEntry     Boolean  @default(true)
+  videoOnEntry    Boolean  @default(true)
 
   // token gated room configs
   tokenType       TokenType?
@@ -70,12 +69,13 @@ model RoomConfig {
 }
 
 model RecordingMetadata {
-  id              Int        @id @default(autoincrement())
-  chain           Chain?
-  tokenType       TokenType?
-  contractAddress String?
-  experience      Experience @relation(fields: [experianceId], references: [id])
-  experianceId    Int        @unique
+  id                  Int        @id @default(autoincrement())
+  chain               Chain?
+  tokenType           TokenType?
+  contractAddress     String?
+  tokenGatedRecording Boolean
+  experience          Experience @relation(fields: [experianceId], references: [id])
+  experianceId        Int        @unique
 }
 
 model Recording {
@@ -86,6 +86,7 @@ model Recording {
   recDescription String
   Experience     Experience @relation(fields: [experienceId], references: [id])
   experienceId   Int
+  recContractId  Int?
 }
 
 model ExperianceStats {
@@ -93,8 +94,8 @@ model ExperianceStats {
   experianceStatus ExperianceStatus @default(FINISHED)
   totalRatings     Int              @default(0)
   overallRating    Int              @default(5)
-  startTime       DateTime
-  expiryTime      DateTime
+  startTime        DateTime
+  expiryTime       DateTime
   lastMeet         DateTime?
   experience       Experience       @relation(fields: [experienceId], references: [id])
   experienceId     Int              @unique
@@ -111,6 +112,7 @@ enum Chain {
   SOLANA
   TEZOS
   BSC
+  FILECOIN_HYPERSPACE
 }
 
 enum TokenType {
@@ -119,6 +121,7 @@ enum TokenType {
   ERC1155
   SPL
   BEP20
+  REC20
 }
 
 enum ConditionType {

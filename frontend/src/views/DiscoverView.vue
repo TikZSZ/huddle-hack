@@ -2,6 +2,8 @@
 import { getExperiences } from '@/utils/api';
 import { onMounted, ref, type Ref } from 'vue';
 import type {Experiences} from "@/utils/types"
+import useStore from "@/stores/store"
+const store = useStore()
 const experiences:Ref<Experiences> = ref( [
   {
     "id": 1,
@@ -134,9 +136,9 @@ onMounted( async () =>{
   { hour: '2-digit', minute: '2-digit' } ) }}</span>
           </div>
           <div class="host">
-            <div class="host-details">
+            <div class="host-details" >
               <p class="host-name">Hosts</p>
-              <p class="host-eth-address">{{ experience.hosts[ 0 ].ethAddress }}</p>
+              <p class="host-eth-address" :style="{color: store.user?.ethAddress === host.ethAddress? 'hsla(160, 100%, 37%, 1)':'#6b7280'}" v-for="host in experience.hosts">{{ host.ethAddress }}</p>
             </div>
           </div>
         </div>

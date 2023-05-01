@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { getExperience } from '@/utils/api';
 import type { Experience } from '@/utils/types';
-import exp from 'constants';
 import { onMounted, ref, type Ref } from 'vue';
-import { routeLocationKey, useRoute } from 'vue-router';
+import {useRoute } from 'vue-router';
+import useStore from "@/stores/store"
 
+const store = useStore()
 const route = useRoute()
 console.log( route.params );
 const id = route.params.id
@@ -121,10 +122,10 @@ onMounted(async () => {
       <section class="hosts">
         <h2>Hosts</h2>
         <div class="hosts-content">
-          <div v-for="host in experience.hosts" :key="host.id" class="host">
+          <div v-for="host in [...experience.hosts,experience.hosts[0]]" :key="host.id" class="host">
             <div class="host-info">
               <img src="/chat-room.jpg" alt="Host Image" class="host-image">
-              <p class="host-address">{{ host.ethAddress.substring( 0, 10 ) }}...</p>
+              <p class="host-address" :style="{color: store.user?.ethAddress === host.ethAddress? 'hsla(160, 100%, 37%, 1)':'#6b7280'}" >{{ host.ethAddress.substring( 0, 10 ) }}...</p>
             </div>
           </div>
         </div>
@@ -179,28 +180,6 @@ onMounted(async () => {
   margin-left: 30px;
   font-size: 35px;
 }
-@media screen and (max-width: 1140px) {
-.header-flex {
-flex-wrap: wrap;
-justify-content: center;
-text-align: center;
-}
-
-.header-flex > div {
-flex-basis: 100%;
-margin-bottom: 20px;
-}
-
-.header-text {
-margin: 20px 0;
-font-size: 25px;
-}
-
-.header-image {
-max-width: 150px;
-margin-bottom: 20px;
-}
-}
 /* Stats Section */
 .section-parent {
   background-color: var(--color-background);
@@ -211,10 +190,15 @@ margin-bottom: 20px;
 
 /* Hosts Section */
 .hosts {
-  padding: 50px;
+  padding: 50px 0;
   text-align: center;
   background-color: var(--secondary-color);
   color: var(--primary-color);
+}
+.hosts-content{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
 }
 
 .hosts h2 {
@@ -369,6 +353,36 @@ button {
   margin-left: 5px;
 }
 
+@media screen and (max-width: 1140px) {
+.header-flex {
+flex-wrap: wrap;
+justify-content: center;
+text-align: center;
+}
+
+.hosts-content {
+flex-wrap: wrap;
+justify-content: center;
+text-align: center;
+column-gap: 20px;
+}
+
+.header-flex > div {
+flex-basis: 100%;
+margin-bottom: 20px;
+}
+
+.header-text {
+margin: 20px 0;
+font-size: 25px;
+}
+
+.header-image {
+max-width: 150px;
+margin-bottom: 20px;
+}
+}
+
 /* Feedback section */
 
 .feedback {
@@ -425,11 +439,4 @@ button {
   background-color: #00796b;
 }
 
-.room {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 50px;
-}
 </style>

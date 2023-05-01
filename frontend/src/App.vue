@@ -22,11 +22,8 @@ async function handleMetamaskLogin ()
       metaMaskLoginDisabled.value = true
       throw new Error( error )
     }
-    await window.ethereum.request( {
-      method: 'wallet_switchEthereumChain',
-      params: [ { chainId: '0x1' } ]
-    } );
     const provider = new BrowserProvider( window.ethereum )
+    await provider.send("wallet_switchEthereumChain",[{chainId:"0x1"}])
     await provider.send( "eth_requestAccounts", [] )
     const accounts = await provider.listAccounts()
     const account = accounts[ 0 ];
@@ -48,6 +45,14 @@ async function handleMetamaskLogin ()
   }
 }
 
+// Network name
+// Filecoin - Hyperspace testnet
+// Network URL
+// https://filecoin-hyperspace.chainup.net/rpc/v1
+// Chain ID
+// 3141
+// Currency symbol
+// tFIL
 // window.ethereum.request({
 //     method: "wallet_addEthereumChain",
 //     params: [{
