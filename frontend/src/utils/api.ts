@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { Experience, Experiences, User } from "./types"
+import type { Experience, Experiences, RecordingResponse, Recordings, User } from "./types"
 
 const baseURL = "http://localhost:5000"
 const api = axios.create({
@@ -30,5 +30,15 @@ export async function getExperiences(){
 
 export async function getExperience(expId:number){
   const {data} = await api.get<Experience>(`/experiences/${expId}`)
+  return data
+}
+
+export async function getRecordings(expId:number){
+  const {data} = await api.get<Recordings>(`/experiences/${expId}/recordings`)
+  return data
+}
+
+export async function getRecording(expId:number,recId:number){
+  const {data} = await api.get<RecordingResponse>(`/experiences/${expId}/recordings/${recId}`)
   return data
 }

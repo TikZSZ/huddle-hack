@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { getExperience } from '@/utils/api';
-import type { Experience } from '@/utils/types';
+import { getExperience,getRecording,getRecordings } from '@/utils/api';
+import type { Experience, Recordings } from '@/utils/types';
 import { onMounted, ref, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import useStore from "@/stores/store"
@@ -40,10 +40,14 @@ const experience: Ref<Experience> = ref( {
   ],
 } )
 
+const recordings: Ref<Recordings|null> = ref(null)
+
 onMounted( async () =>
 {
   const exp = await getExperience( parseInt( id as string ) )
   experience.value = exp
+  const recs = await getRecordings(exp.id)
+  recordings.value = recs
 } )
 
 </script>
@@ -137,23 +141,11 @@ onMounted( async () =>
       <section class="recordings">
         <h2>Recordings</h2>
         <div class="recording-cards">
-          <div class="recording-card">
+          <div class="recording-card" v-for="recording in recordings">
             <div class="recording-info">
-              <h3 class="rec-title">Recording Title</h3>
-              <p class="rec-description">Recording description goes here. Lorem ipsum dolor sit amet, consectetur
-                adipiscing elit.</p>
-              <p class="rec-date">Recorded on May 1, 2023</p>
-            </div>
-            <div class="recording-actions">
-              <button class="download-btn">Download</button>
-            </div>
-          </div>
-          <div class="recording-card">
-            <div class="recording-info">
-              <h3 class="rec-title">Recording Title</h3>
-              <p class="rec-description">Recording description goes here. Lorem ipsum dolor sit amet, consectetur
-                adipiscing elit.</p>
-              <p class="rec-date">Recorded on April 30, 2023</p>
+              <h3 class="rec-title">{{ recording.recTitle }}</h3>
+              <p class="rec-description">{{ recording.recDescription }}</p>
+              <p class="rec-date">{{ new Date(recording.dateRecorded).toLocaleString() }}</p>
             </div>
             <div class="recording-actions">
               <button class="download-btn">Download</button>
