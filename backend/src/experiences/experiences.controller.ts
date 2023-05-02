@@ -48,8 +48,9 @@ export class ExperiencesController
       return {recMetadata,recording}
     }
     if(recMetadata.tokenType !== "REC20") { 
+      throw new BadRequestException("Not implemented")
       // backend checks and then return url for download
-      return {recMetadata,recording}
+      // return {recMetadata,recording}
     }
     if(!recording.recContractId) throw new NotFoundException()
     return {recMetadata,recording:null,recContractId:recording!.recContractId}

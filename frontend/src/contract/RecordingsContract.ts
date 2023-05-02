@@ -3,14 +3,9 @@ import ContractJSON from "./Recordings.json";
 
 export class RecordingsContract
 {
-  constructor( public config: { name?: string, symbol?: string, contractAddress?: string },public provider:BrowserProvider )
-  {
-
-  }
-
- 
-
-  async deploy (): Promise<string>
+  constructor( public config: { name?: string, symbol?: string, contractAddress?: string }, public provider: BrowserProvider )
+  { }
+  async deployFactory ()
   {
     const provider = this.provider
     const signer = await provider.getSigner();
@@ -20,7 +15,12 @@ export class RecordingsContract
       signer
     );
     if ( !this.config.name && !this.config.symbol ) throw new Error( "name and symbol not provided" )
-    const contract = await contractFactory.deploy( this.config.name, this.config.symbol,500 );
+    const contract = await contractFactory.deploy( this.config.name, this.config.symbol, 500 );
+    return contract
+  }
+
+  async deploy(){
+    const contract = await this.deployFactory()
     await contract.waitForDeployment()
     this.config.contractAddress = await contract.getAddress();
     return this.config.contractAddress;
@@ -53,6 +53,22 @@ export class RecordingsContract
       signer
     );
     const recording = await contract.getRecording( id );
+    return recording;
+  }
+
+  async getCurrentCount ()
+  {
+    if ( !this.config.contractAddress ) throw new Error( "Contract address not found" )
+
+    const provider = this.provider
+    const signer = await provider.getSigner();
+
+    const contract = new Contract(
+      this.config.contractAddress,
+      ContractJSON.abi,
+      signer
+    );
+    const recording = await contract.getCurrentCount();
     return recording;
   }
 }

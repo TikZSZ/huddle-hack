@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Recordings is ERC20, Ownable {
+    uint256 private recordingCount = 0;
     mapping(uint256 => string) private _recordings;
 
     constructor(
@@ -20,22 +21,18 @@ contract Recordings is ERC20, Ownable {
     }
 
     function addRecording(uint256 id, string memory url) public onlyOwner {
-        require(
-            bytes(_recordings[id]).length == 0,
-            "Recording with this ID already exists"
-        );
+        require(bytes(_recordings[id]).length == 0, "Recording with this ID already exists");
         _recordings[id] = url;
+        recordingCount++;
     }
 
     function getRecording(uint256 id) public view returns (string memory) {
-        require(
-            bytes(_recordings[id]).length > 0,
-            "Recording with this ID does not exist"
-        );
-        require(
-            balanceOf(msg.sender) >= 1,
-            "You need to hold at least 1 token to access this recording"
-        );
+        require(bytes(_recordings[id]).length > 0, "Recording with this ID does not exist");
+        require(balanceOf(msg.sender) >= 1, "You need to hold at least 1 token to access this recording");
         return _recordings[id];
+    }
+
+    function getCurrentCount() public view returns (uint256) {
+        return recordingCount;
     }
 }

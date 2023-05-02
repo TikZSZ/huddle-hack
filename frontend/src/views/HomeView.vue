@@ -33,11 +33,17 @@ async function getProvider ()
 
 const provider = await getProvider()
 
-const recContract = new RecordingsContract( { name: "RecToken", symbol: "REC" }, provider )
-const contractAddress = await recContract.deploy()
-console.log( contractAddress );
-const rec = await recContract.getRecording(1)
-console.log(rec);
+const recContract = new RecordingsContract( { name: "RecToken", symbol: "REC",contractAddress:"0xD723552acce3f08bb9A505a79eC675C7974919a4" }, provider )
+// const contractAddress = await recContract.deploy()
+// console.log( contractAddress );
+const count = await recContract.getCurrentCount()
+console.log(count);
+
+// const rec1 = await recContract.addRecording(1,"adad")
+// console.log(rec1);
+
+const rec2 = await recContract.getRecording(1)
+console.log(rec2);
 
 
 </script>
