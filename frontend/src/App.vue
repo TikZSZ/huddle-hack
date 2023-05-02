@@ -95,7 +95,8 @@ onMounted( async () =>
         <div class="navbar-account">
           <div v-if="store.isLoggedIn()" style="display: flex;">
             <AccountIcon alt="User Avatar" />
-            <span style="margin-left: 5px;">0x1234...5678</span>
+            
+            <span style="margin-left: 5px;">{{ `${store.user?.ethAddress.substring(0,6)}...${store.user?.ethAddress.substring(6,10)}`  }}</span>
           </div>
           <div v-else>
             <button :class="{ 'normal-state': !metaMaskLoginDisabled, 'error-state': metaMaskLoginDisabled }"

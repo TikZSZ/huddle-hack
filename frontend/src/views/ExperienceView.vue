@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getExperience,getRecording,getRecordings } from '@/utils/api';
-import type { Experience, Recordings } from '@/utils/types';
+import type { Experience, RecordingResponse, Recordings } from '@/utils/types';
 import { onMounted, ref, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import useStore from "@/stores/store"
@@ -41,6 +41,20 @@ const experience: Ref<Experience> = ref( {
 } )
 
 const recordings: Ref<Recordings|null> = ref(null)
+const recording: Ref<RecordingResponse|null> = ref(null)
+const downloadAnchorTag:Ref<HTMLAnchorElement|null> = ref(null)
+
+async function downloadRecording(recId:number){
+  console.log(recId);
+  const {recMetadata,recording,recContractId} = await getRecording(experience.value.id,recId) 
+  if(recMetadata.tokenGatedRecording === true && recMetadata.tokenType === "REC20" ){
+    // do frontend download
+  }else {
+    
+  }
+  downloadAnchorTag.value!.href = "https://i.ibb.co/N9byH6K/52437634tg.jpg"
+  downloadAnchorTag.value?.click()
+}
 
 onMounted( async () =>
 {
@@ -138,21 +152,22 @@ onMounted( async () =>
         </div>
       </section>
 
-      <section class="recordings">
+      <section class="recordings" v-if="recordings && recordings.length > 0">
         <h2>Recordings</h2>
         <div class="recording-cards">
-          <div class="recording-card" v-for="recording in recordings">
+          <div class="recording-card" v-for="recording in recordings" :key="recording.id">
             <div class="recording-info">
               <h3 class="rec-title">{{ recording.recTitle }}</h3>
               <p class="rec-description">{{ recording.recDescription }}</p>
               <p class="rec-date">{{ new Date(recording.dateRecorded).toLocaleString() }}</p>
             </div>
             <div class="recording-actions">
-              <button class="download-btn">Download</button>
+              <button class="download-btn" @click="downloadRecording(recording.id)">Download</button>
             </div>
           </div>
           <!-- Add more recording cards here -->
         </div>
+        <a href="" :ref="downloadAnchorTag" hidden></a>
       </section>
 
       <section class="feedback">
