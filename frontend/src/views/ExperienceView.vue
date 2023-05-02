@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { getExperience,getRecording,getRecordings } from '@/utils/api';
+import { getExperience, getRecording, getRecordings } from '@/utils/api';
 import type { Experience, RecordingResponse, Recordings } from '@/utils/types';
 import { onMounted, ref, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import useStore from "@/stores/store"
+import RecordingsContract from '@/contract/RecordingsContract';
 
 const store = useStore()
 const route = useRoute()
@@ -40,27 +41,42 @@ const experience: Ref<Experience> = ref( {
   ],
 } )
 
-const recordings: Ref<Recordings|null> = ref(null)
-const recording: Ref<RecordingResponse|null> = ref(null)
-const downloadAnchorTag:Ref<HTMLAnchorElement|null> = ref(null)
+const recordings: Ref<Recordings | null> = ref( null )
+const downloadAnchorTag: Ref<HTMLAnchorElement | null> = ref( null )
 
-async function downloadRecording(recId:number){
-  console.log(recId);
-  const {recMetadata,recording,recContractId} = await getRecording(experience.value.id,recId) 
-  if(recMetadata.tokenGatedRecording === true && recMetadata.tokenType === "REC20" ){
+function triggerDownload ( url: string )
+{
+  if ( !downloadAnchorTag.value ) throw new Error( "Could not initalize download anchor" )
+  downloadAnchorTag.value.href = url
+  downloadAnchorTag.value.download = url.split( "/" )[ -1 ] || ""
+  downloadAnchorTag.value.click()
+}
+
+async function downloadRecording ( recId: number )
+{
+  //"https://i.ibb.co/N9byH6K/52437634tg.jpg"
+  console.log( recId );
+  const { recMetadata, recording, recContractId } = await getRecording( experience.value.id, recId )
+  if ( recMetadata.tokenGatedRecording === true && recMetadata.tokenType === "REC20" )
+  {
     // do frontend download
-  }else {
-    
+    const provider = await RecordingsContract.getProvider()
+    const recordingContract = new RecordingsContract( { contractAddress: recMetadata.contractAddress }, provider )
+    const recURL = await recordingContract.getRecording( recContractId )
+    if ( !recURL ) throw new Error( `couldn't download a recording from ${recMetadata.contractAddress} for id ${recContractId}` )
+    triggerDownload( recURL )
+  } else
+  {
+    if ( recording )
+      triggerDownload( recording.url )
   }
-  downloadAnchorTag.value!.href = "https://i.ibb.co/N9byH6K/52437634tg.jpg"
-  downloadAnchorTag.value?.click()
 }
 
 onMounted( async () =>
 {
   const exp = await getExperience( parseInt( id as string ) )
   experience.value = exp
-  const recs = await getRecordings(exp.id)
+  const recs = await getRecordings( exp.id )
   recordings.value = recs
 } )
 
@@ -133,9 +149,9 @@ onMounted( async () =>
         <button v-if="roomInfo && isHost" class="end-room" @click="endRoom">End Room</button>
       </div> -->
       <section class="host-buttons">
-        <button class="create-room">Create Room</button>
-        <button class="join-room">Join Room</button>
+        <button class="create-room">Initiate Meet</button>
         <button class="end-room">End Room</button>
+        <button class="join-room">Join Room</button>
       </section>
 
       <section class="hosts">
@@ -159,15 +175,15 @@ onMounted( async () =>
             <div class="recording-info">
               <h3 class="rec-title">{{ recording.recTitle }}</h3>
               <p class="rec-description">{{ recording.recDescription }}</p>
-              <p class="rec-date">{{ new Date(recording.dateRecorded).toLocaleString() }}</p>
+              <p class="rec-date">{{ new Date( recording.dateRecorded ).toLocaleString() }}</p>
             </div>
             <div class="recording-actions">
-              <button class="download-btn" @click="downloadRecording(recording.id)">Download</button>
+              <button class="download-btn" @click="downloadRecording( recording.id )">Download</button>
             </div>
           </div>
           <!-- Add more recording cards here -->
         </div>
-        <a href="" :ref="downloadAnchorTag" hidden></a>
+        <a href="" target="__blank" ref="downloadAnchorTag" hidden></a>
       </section>
 
       <section class="feedback">
@@ -350,7 +366,8 @@ button {
 .hosts-content {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: center;
+  column-gap: 60px;
 }
 
 .hosts h2 {
@@ -566,4 +583,5 @@ button {
 
 .feedback button[type="submit"]:hover {
   background-color: #00796b;
-}</style>
+}
+</style>

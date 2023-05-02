@@ -43,7 +43,7 @@ async function main ()
       ownerId: user.id,
       participantsAllowed: 50,
       hosts: { connectOrCreate: hosts },
-      recordingMetadata: { create: { tokenGatedRecording: true, chain: "FILECOIN_HYPERSPACE", tokenType: "REC20", contractAddress: "" } },
+      recordingMetadata: { create: { tokenGatedRecording: true, chain: "FILECOIN_HYPERSPACE", tokenType: "REC20", contractAddress: "0xD723552acce3f08bb9A505a79eC675C7974919a4" } },
       roomConfig: {
         create: {
           roomTitle: "Beta Experiance",

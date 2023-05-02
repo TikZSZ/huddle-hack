@@ -128,7 +128,7 @@ header {
 
 .content {
   margin: 60px auto 0 auto;
-  width: 90%;
+  width: 50%;
   padding-top: 1%;
   /* set margin-top equal to the height of the navbar */
 }
@@ -213,6 +213,17 @@ header {
   transition: background-color 0.3s;
 }
 
+@media (max-width: 2000px) {
+  .content {
+    width: 70%;
+  }
+}
+
+@media (max-width: 1500px) {
+  .content {
+    width: 85%;
+  }
+}
 
 @media (max-width: 600px) {
   .navbar {
