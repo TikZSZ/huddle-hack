@@ -28,4 +28,8 @@ export class Recording {
     @IsDefined()
     @IsInt()
     experienceId!: number;
+
+    @IsOptional()
+    @IsInt()
+    recContractId?: number;
 }

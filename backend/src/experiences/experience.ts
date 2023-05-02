@@ -17,11 +17,11 @@ export class RoomConfig {
   @IsBoolean()
   roomLocked!: boolean;
 
-  @IsOptional()
+  @IsDefined()
   @IsBoolean()
   muteOnEntry!: boolean;
 
-  @IsOptional()
+  @IsDefined()
   @IsBoolean()
   videoOnEntry!: boolean;
 

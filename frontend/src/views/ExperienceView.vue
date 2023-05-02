@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { getExperience, getRecording, getRecordings } from '@/utils/api';
+import { getExperience, getRecording, getRecordings, getRoomConfig, wrapUp as wrapUpAPI, initMeet as initMeetAPI, createIFrameRoom } from '@/utils/api';
 import type { Experience, RecordingResponse, Recordings } from '@/utils/types';
 import { onMounted, ref, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import useStore from "@/stores/store"
 import RecordingsContract from '@/contract/RecordingsContract';
+import axios from 'axios';
 
 const store = useStore()
 const route = useRoute()
@@ -73,20 +74,48 @@ async function downloadRecording ( recId: number )
   }
 }
 
-async function redirectToMeetPage ()
+function redirectToMeetPage ()
 {
-  if ( !joinRoomRef.value ) return
-  joinRoomRef.value.target = "__blank"
-  joinRoomRef.value.href = "https://www.huddle01.com/"
+  if ( !experience.value.roomId || !joinRoomRef.value ) {
+    console.log("cannot redirect");
+    return
+  }
+  joinRoomRef.value.target = "_blank"
+  joinRoomRef.value.href = `https://iframe.huddle01.com/${experience.value.roomId}`
   joinRoomRef.value.click()
 }
 
-async function initiateRoom(){
-
+async function initMeet ()
+{
+  try
+  {
+    const { id, roomTitle: title, roomDescription: description, experianceId, conditionType, conditionValue, contractAddress,expiryTime,startTime,
+      ...rest } = await getRoomConfig( experience.value.id )
+    const contractAddresses = contractAddress ? [contractAddress] :  undefined
+    const hostWallets = experience.value.hosts.map( ( host ) => host.ethAddress )
+    const createdRoom = await createIFrameRoom( { title, description, hostWallets, contractAddress: contractAddresses, ...rest } )
+    if ( createdRoom.data.roomId )
+    {
+      const exp = await initMeetAPI( experience.value.id, createdRoom.data.roomId )
+      experience.value = exp
+      redirectToMeetPage()
+    }
+  } catch ( err )
+  {
+    console.error( err )
+  }
 }
 
-async function wrapUp(){
-  
+async function wrapUp ()
+{
+  try
+  {
+    const exp = await wrapUpAPI(experience.value.id)
+    experience.value = exp
+  } catch ( err )
+  {
+    console.error( err )
+  }
 }
 
 onMounted( async () =>
@@ -155,8 +184,8 @@ onMounted( async () =>
   { hour: '2-digit', minute: '2-digit' } ) }}</span>
               </div>
               <div class="status">
-                <button v-if="experience.experianceStats.experianceStatus === 'ONGOING' && experience.roomId" class="join-room"
-                  @click="redirectToMeetPage">Join Room</button>
+                <button v-if="experience.experianceStats.experianceStatus === 'ONGOING' && experience.roomId"
+                  class="join-room" @click="redirectToMeetPage">Join Room</button>
                 <button v-else class="join-room-inactive" @click="redirectToMeetPage">Inactive</button>
                 <a href="" ref="joinRoomRef" hidden></a>
               </div>
@@ -173,7 +202,7 @@ onMounted( async () =>
         <button v-if="roomInfo && isHost" class="end-room" @click="endRoom">End Room</button>
       </div> -->
       <section class="host-buttons">
-        <button class="create-room" @click="initiateRoom()"
+        <button class="create-room" @click="initMeet()"
           v-if="store.isLoggedIn() && experience.experianceStats.experianceStatus === 'FINISHED' && experience.ownerId == store.user!.id">
           Initiate Room
         </button>

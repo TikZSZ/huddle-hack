@@ -20,13 +20,23 @@ export class ExperiencesController
   @Get( "/:experienceId" )
   getExperince ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
   {
-    return this.prisma.experience.findFirst( { include: { experianceStats: true, hosts: true, recordingMetadata: true, roomConfig: true, owner: true, recordings: true, }, where: { id: experienceId } } )
+    return this.prisma.experience.findFirst( { include: { experianceStats: true, hosts: true }, where: { id: experienceId } } )
   }
 
   @Get( "/:experienceId/roomConfig" )
-  getRoomConfig ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
+  async getRoomConfig ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
   {
-    return this.prisma.experience.findFirst( { where: { id: experienceId }, select: { roomConfig: true } } )
+    const exp = await this.prisma.experience.findFirst( { where: { id: experienceId }, select: { recordingMetadata: true, roomConfig: true, tokenGatedRoom: true } } )
+    if ( !exp ) throw new NotFoundException()
+    if ( !exp.roomConfig ) throw new NotFoundException()
+    const { recordingMetadata, roomConfig, ...rest } = exp
+
+    if ( !rest.tokenGatedRoom )
+    {
+      const { chain, conditionType, conditionValue,tokenType, contractAddress, ...newRoomConfig } = roomConfig
+      return newRoomConfig
+    }
+    return roomConfig
   }
 
   @Get( "/:experienceId/recordings" )
@@ -77,7 +87,8 @@ export class ExperiencesController
         roomId: data.roomId,
         experianceStats: { update: { experianceStatus: "ONGOING", lastMeet: roomCreationTime.toISOString() } },
         roomCreationTime: roomCreationTime.toISOString()
-      }
+      },
+      include: { experianceStats: true, hosts: true }
     } )
   }
 
@@ -90,7 +101,8 @@ export class ExperiencesController
     return this.prisma.experience.update( {
       where: { id: experienceId }, data: {
         experianceStats: { update: { experianceStatus: "FINISHED" } },
-      }
+      },
+      include: { experianceStats: true, hosts: true }
     } )
   }
 
@@ -102,14 +114,16 @@ export class ExperiencesController
     const user = await this.prisma.user.findUnique( { where: { id: userId } } )
     const { roomConfig, recordingMetadata, startTime, expiryTime, hosts, ...rest } = data
     if ( !user ) throw new BadRequestException()
+    if ( hosts.length < 1 ) throw new BadRequestException()
+
     let verifiedHosts: {
       where: { ethAddress: string },
       create: {
         ethAddress: string,
         nonce: string
       }
-    }[] = [ { where: { ethAddress: user.ethAddress }, create: { ethAddress: user.ethAddress, nonce: "" } } ]
-    if ( hosts.length > 0 )
+    }[] = []
+    
     {
       hosts.map( ( hostAddress ) =>
       {
@@ -126,13 +140,7 @@ export class ExperiencesController
       data: {
         ...rest,
         hosts: {
-          connectOrCreate: {
-            where: { ethAddress: "" },
-            create: {
-              ethAddress: "",
-              nonce: ""
-            }
-          }
+          connectOrCreate: verifiedHosts
         },
         experianceStats: { create: { startTime, expiryTime, experianceStatus: ExperianceStatus.FINISHED } },
         recordingMetadata: { create: { ...recordingMetadata, tokenGatedRecording: rest.tokenGatedRecording } },

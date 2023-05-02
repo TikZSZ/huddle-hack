@@ -52,7 +52,26 @@ export interface Experience {
   // owner: Host;
 }
 
-interface RoomConfig {
+export enum Chain {
+  ETHEREUM = "ETHEREUM",
+  COSMOS = "COSMOS",
+  SOLANA = "SOLANA",
+  TEZOS = "TEZOS",
+  BSC = "BSC",
+  FILECOIN_HYPERSPACE = "FILECOIN_HYPERSPACE"
+}
+
+export enum TokenType {
+  ERC20 = "ERC20",
+  ERC721 = "ERC721",
+  ERC1155 = "ERC1155",
+  SPL = "SPL",
+  BEP20 = "BEP20",
+  REC20 = "REC20"
+}
+
+
+export interface RoomConfig {
   id: number;
   roomTitle: string;
   roomDescription: string;
@@ -61,11 +80,11 @@ interface RoomConfig {
   roomLocked: boolean;
   muteOnEntry: boolean;
   videoOnEntry: boolean;
-  tokenType: string;
-  chain: string;
+  tokenType: TokenType;
+  chain: Chain;
   contractAddress: string;
-  conditionType: any|null;
-  conditionValue: any|null;
+  conditionType?:"FOLLOW_HANDLE"|"HAVE_HANDLE"|null,
+  conditionValue?:string|null
   experianceId: number;
 }
 
@@ -93,4 +112,25 @@ interface ExperianceStats {
   expiryTime: string;
   lastMeet: any|null;
   experienceId: number;
+}
+
+
+
+export interface CreateIFrameRoom {
+  title:string,
+  description?:string,
+  startTime?:string,
+  endTime?:string,
+  hostWallets?:string[],
+  roomLocked:boolean,
+  muteOnEntry:boolean,
+  videoOnEntry:boolean
+}
+
+export interface CreateTokenGatedIFrameRoom extends CreateIFrameRoom{
+  tokenType:TokenType,
+  chain:Chain,
+  contractAddress:string[]
+  conditionType?:"FOLLOW_HANDLE"|"HAVE_HANDLE",
+  conditionValue?:string
 }

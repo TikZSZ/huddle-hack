@@ -3,5 +3,6 @@ export enum Chain {
     COSMOS = "COSMOS",
     SOLANA = "SOLANA",
     TEZOS = "TEZOS",
-    BSC = "BSC"
+    BSC = "BSC",
+    FILECOIN_HYPERSPACE = "FILECOIN_HYPERSPACE"
 }

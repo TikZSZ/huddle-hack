@@ -1,4 +1,4 @@
-import { IsInt, IsDefined, IsOptional, IsIn, IsString } from "class-validator";
+import { IsInt, IsDefined, IsOptional, IsIn, IsString, IsBoolean } from "class-validator";
 import { Experience } from "./";
 import { getEnumValues } from "../helpers";
 import { Chain, TokenType } from "../enums";
@@ -21,9 +21,13 @@ export class RecordingMetadata {
     contractAddress?: string;
 
     @IsDefined()
+    @IsBoolean()
+    tokenGatedRecording!: boolean;
+
+    @IsDefined()
     experience!: Experience;
 
     @IsDefined()
     @IsInt()
-    experianceId!: number;
+    experienceId!: number;
 }

@@ -1,223 +1,543 @@
 <script lang="ts" setup>
-function submitData(e:Event){
-  console.log("hello world");
+import useStore from '@/stores/store';
+import { type Experience, Chain, TokenType } from '@/utils/types';
+import { ref, type Ref, computed } from 'vue';
+
+interface IRoomCreation
+{
+  tokenGatedRecording: boolean;
+  recordingMetadata: RecordingMetadata;
+  roomConfig: RoomConfig;
+  expTitle: string;
+  tokenGatedRoom: boolean;
+  expDescription: string;
+  startTime: string;
+  expiryTime: string;
+  participantsAllowed: number;
+  hosts: string[]
 }
+
+interface RoomConfig
+{
+  roomLocked: boolean;
+  videoOnEntry: boolean;
+  muteOnEntry: boolean;
+  tokenType: string;
+  chain: string;
+  contractAddress: string;
+}
+
+interface RecordingMetadata
+{
+  tokenType: string;
+  chain: string;
+}
+const store = useStore()
+const userAddress = store.user!.ethAddress 
+
+const exp: Ref<IRoomCreation> = ref( {
+  "expTitle": "New World",
+  "expDescription": "Catch on new Events happening accross fields, like AI,ML and WEB3",
+  "tokenGatedRoom": false,
+  "startTime": (new Date()).toISOString(),
+  "expiryTime": (new Date()).toISOString(),
+  participantsAllowed: 50,
+  hosts: [
+  userAddress
+  ],
+  "tokenGatedRecording": false,
+  "recordingMetadata": {
+    "tokenType": "REC20",
+    "chain": "FILECOIN_HYPERSPACE"
+  },
+  "roomConfig": {
+    "roomLocked": true,
+    "videoOnEntry": true,
+    "muteOnEntry": true,
+    "tokenType": "ERC20",
+    "chain": "ETHEREUM",
+    "contractAddress": "0x............"
+  }
+} )
+
+const hosts = computed( {
+  get ()
+  {
+    return exp.value.hosts
+  },
+  set ( newHosts )
+  {
+    exp.value.hosts = newHosts
+  }
+} )
+
+function addHost ()
+{
+  exp.value.hosts.push( '' )
+}
+function removeHost ( index: number )
+{
+  console.log( exp.value.hosts, ...exp.value.hosts.slice( 0, index ), ...exp.value.hosts.slice( index + 1, 0 ) );
+
+  exp.value.hosts.splice( index, 1 )
+}
+function updateHost ( index: number, value: string )
+{
+  exp.value.hosts[ index ] = value
+}
+
+async function createExperience ()
+{
+  console.log( JSON.parse( JSON.stringify( exp.value ) ) );
+
+}
+
+function getEnumValues<T> ( enumType: T ): Array<string>
+{
+  return [
+    ...new Set(
+      Object.entries( enumType as any )
+        .filter( ( [ key ] ) => !~~key )
+        .flatMap( ( item ) => item ),
+    ),
+  ] as any
+}
+console.log( getEnumValues( Chain ) );
+
+
 </script>
 
 <template>
-  <div class="container">
-    <!-- <h1>Experience Record Form</h1> -->
-    <form @submit.prevent="(e:any) => {submitData(e);
-    }">
-      <label for="expTitle">Title:</label>
-      <input type="text" id="expTitle" name="expTitle" placeholder="Enter title">
+  <div class="dashboard">
+    <form @submit.prevent="createExperience">
+      <label>Experience Title:</label>
+      <input type="text" v-model="exp.expTitle"><br>
 
-      <label for="expDescription">Description:</label>
-      <input type="text" id="expDescription" name="expDescription" placeholder="Enter description">
+      <label>Experience Description:</label>
+      <textarea v-model="exp.expDescription"></textarea><br>
 
-      <label for="startTime">Start Time:</label>
-      <input type="datetime-local" id="startTime" name="startTime">
+      <label>Participants Allowed:</label>
+      <input type="number" v-model="exp.participantsAllowed"><br>
 
-      <label for="expiryTime">Expiry Time:</label>
-      <input type="datetime-local" id="expiryTime" name="expiryTime">
-
-      <div>
-        <input type="checkbox" id="roomLocked" name="roomLocked" value="true">
-        <label for="roomLocked">Room Locked</label>
+      <div class="hosts-section">
+        <label>Hosts:</label>
+        <div>
+          <div v-for="(host, index) in hosts" :key="index">
+            <input type="text" :value="host" none @input="updateHost( index, $event.target.value )">
+            <button @click="removeHost( index )">Remove</button>
+          </div>
+          <button @click="addHost()">Add Host</button>
+        </div>
       </div>
 
-      <div>
-        <input type="checkbox" id="muteOnEntry" name="muteOnEntry" value="true">
-        <label for="muteOnEntry">Mute on Entry</label>
-      </div>
-      <div>
-        <input type="checkbox" id="videoOnEntry" name="videoOnEntry" value="true">
-        <label for="videoOnEntry">Video on Entry</label>
-      </div>
+      <label>Start Time:</label>
+      <input type="datetime-local" v-model="exp.startTime"><br>
 
-      <label for="participantsAllowed">Participants Allowed:</label>
-      <input type="text" id="participantsAllowed" name="participantsAllowed" placeholder="Enter participants allowed">
+      <label>Expiry Time:</label>
+      <input type="datetime-local" v-model="exp.expiryTime"><br>
 
-      <!-- <label for="currentParticipants">Current Participants:</label>
-      <input type="text" id="currentParticipants" name="currentParticipants" placeholder="Enter current participants"> -->
-
-      <!-- <label for="roomId">Room ID:</label>
-      <input type="number" id="roomId" name="roomId" placeholder="Enter room ID"> -->
-
-      <!-- <label for="timeCreated">Time Created:</label>
-      <input type="datetime-local" id="timeCreated" name="timeCreated"> -->
-      <div>
-        <input type="checkbox" id="tokenGatedRoom" name="tokenGatedRoom" value="true">
-        <label for="tokenGatedRoom">Token Gated Room</label>
+      <div class="checkbox-label">
+        <label>Token Gated Recording:</label>
+        <div class="checkbox-container">
+          <input id="token-gated-recording" type="checkbox" v-model="exp.tokenGatedRecording">
+          <label for="token-gated-recording" class="checkbox-icon"></label>
+        </div>
       </div>
 
-      <template>
-        <label for="chain">Chain:</label>
-        <select id="chain" name="chain">
-          <option value="ETHEREUM">Ethereum</option>
-          <option value="COSMOS">Cosmos</option>
-          <option value="SOLANA">Solana</option>
-        </select>
+      <template v-if="exp.tokenGatedRecording">
+        <label>Recording Metadata:</label>
+        <fieldset>
+          <label class="radio-label" data-v-336c5134="">Token Type:</label>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input class="radio-input" type="radio" v-model="exp.recordingMetadata.tokenType" name="token-type"
+                value="REC20">
+              <span class="radio-button"></span>
+              REC20
+            </label>
+          </div>
 
-        <label for="tokenType">Token Type:</label>
-        <select id="tokenType" name="tokenType">
-          <option value="ERC20">ERC20</option>
-          <option value="ERC721">ERC721</option>
-          <option value="ERC1155">ERC1155</option>
-          <option value="SPL">SPL</option>
-          <option value="BEP20">BEP20</option>
-        </select>
 
-        <label for="gatedRoomContractAddress">Gated Room ContractAddress:</label>
-      <input type="text" id="gatedRoomContractAddress" name="gatedRoomContractAddress" placeholder="Enter Contract Address">
+          <label>Chain:</label>
+          <select v-model="exp.recordingMetadata.chain">
+            <option value="FILECOIN_HYPERSPACE">FILECOIN_HYPERSPACE</option>
+          </select><br>
+        </fieldset>
       </template>
 
-
-
-
-      <!-- <label for="roomTitle">Room Title:</label>
-      <input type="text" id="roomTitle" name="roomTitle" placeholder="Enter room title">
-
-      <label for="roomDescription">Room Description:</label>
-      <input type="text" id="roomDescription" name="roomDescription" placeholder="Enter room description"> -->
-
-      <div>
-        <input type="checkbox" id="tokenGatedRecording" name="tokenGatedRecording" value="true">
-        <label for="tokenGatedRecording">Token Gated Recording </label>
+      <div class="checkbox-label">
+        <label>Token Gated Room:</label>
+        <div class="checkbox-container">
+          <input id="token-gated-room" type="checkbox" v-model="exp.tokenGatedRoom">
+          <label for="token-gated-room" class="checkbox-icon"></label>
+        </div>
       </div>
 
-      <button type="submit" >Submit</button>
+
+      <label>Room Configuration:</label>
+      <fieldset>
+        <div class="checkbox-label">
+          <label>Room Locked:</label>
+          <div class="checkbox-container">
+            <input id="room-locked" type="checkbox" v-model="exp.roomConfig.roomLocked">
+            <label for="room-locked" class="checkbox-icon"></label>
+          </div>
+        </div>
+
+        <div class="checkbox-label">
+          <label>Mute on Entry:</label>
+          <div class="checkbox-container">
+            <input id="mute-entry" type="checkbox" v-model="exp.roomConfig.muteOnEntry">
+            <label for="mute-entry" class="checkbox-icon"></label>
+          </div>
+        </div>
+
+        <div class="checkbox-label">
+          <label>Video on Entry:</label>
+          <div class="checkbox-container">
+            <input id="video-entry" type="checkbox" v-model="exp.roomConfig.videoOnEntry">
+            <label for="video-entry" class="checkbox-icon"></label>
+          </div>
+        </div>
+
+        <template v-if="exp.tokenGatedRoom">
+          <label class="radio-label">Token Type:</label>
+          <div class="radio-group">
+            <template v-for="tokenType in getEnumValues( TokenType )">
+              <label class="radio-option">
+                <input class="radio-input" type="radio" v-model="exp.roomConfig.tokenType" name="roomConfig-token-type"
+                  :value="tokenType">
+                <span class="radio-button"></span>
+                {{ tokenType }}
+              </label>
+            </template>
+          </div>
+
+          <label>Chain:</label>
+          <select v-model="exp.roomConfig.chain">
+            <option :value="chain" v-for="chain in getEnumValues( Chain )">{{ chain }}</option>
+          </select>
+
+          <label>Contract Address:</label>
+          <input type="text" v-model="exp.roomConfig.contractAddress">
+        </template>
+      </fieldset>
+
+      <button type="submit">Save</button>
     </form>
   </div>
 </template>
 
 <style scoped>
-body {
-  font-family: 'Roboto', sans-serif;
-  background-color: #f8f8f8;
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 10px;
 }
 
-.container {
-  width: 80%;
-  margin: auto;
-  padding: 50px 0;
+.checkbox-label label {
+  color: hsla(160, 100%, 37%, 1);
+  font-weight: bold;
+  margin-right: 10px;
 }
 
-h1 {
-  text-align: center;
-  font-weight: 400;
-  font-size: 36px;
-  margin-bottom: 50px;
-}
-
-form {
-  background-color: #fff;
-  padding: 40px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-}
-
-input[type="checkbox"] {
+.checkbox-container {
   position: relative;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  top: 8px;
+}
+
+.checkbox-container input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkbox-container .checkbox-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: inline-block;
   width: 20px;
   height: 20px;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  outline: none;
-  border: 2px solid #4CAF50;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 8px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
 }
 
-input[type="checkbox"]::before {
+.checkbox-container .checkbox-icon::before {
   content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 12px;
+  height: 12px;
+  background-color: transparent;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  transition: transform 0.2s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.checkbox-container input[type="checkbox"]:checked+.checkbox-icon::before {
+  transform: translate(-50%, -50%) scale(1);
+  background-color: hsla(160, 100%, 37%, 1);
+}
+
+/* .checkbox-container input[type="checkbox"]:focus + .checkbox-icon {
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+} */
+
+
+.radio-label {
+  display: inline-block;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.radio-group {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 15px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.radio-input {
+  display: none;
+}
+
+.radio-button {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #bbb;
+  margin-right: 5px;
+  position: relative;
+  vertical-align: middle;
+}
+
+.radio-button::after {
+  content: '';
+  display: block;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0);
   width: 10px;
   height: 10px;
-  background-color: #4CAF50;
   border-radius: 50%;
-  transition: transform 0.2s;
+  background-color: #bbb;
+  transition: transform 0.2s ease-in-out;
 }
 
-input[type="checkbox"]:checked::before {
+.radio-input:checked+.radio-button::after {
   transform: translate(-50%, -50%) scale(1);
 }
 
+.radio-option:last-child {
+  margin-right: 0;
+}
+
+/* Overall form styles */
+
+.dashboard {
+  padding: 70px;
+}
+
+form {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--color-background);
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  font-size: 20px;
+}
+
+/* Label styles */
 label {
-  display: inline-block;
-  margin-bottom: 8px;
-  vertical-align: middle;
-  color: #181818;
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: var(--color-heading);
 }
 
-input[type=text] {
-  width: calc(100% - 30px);
-  padding: 12px;
+/* Input styles */
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
   border: none;
+  border-radius: 5px;
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: start;
+  justify-content: left;
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  appearance: none;
+  border: 2px solid #ccc;
   border-radius: 4px;
-  box-shadow: 0 0 0 2px #4CAF50;
-  margin-bottom: 16px;
-  color: #333333
+  background-color: #fff;
+  transition: background-color 0.3s ease;
 }
 
-input::placeholder {
-  color: #999999;
+input[type="checkbox"]:checked {
+  background-color: #007bff;
 }
 
-input[type=text]:focus,
-input[type="datetime-local"]:focus,
-select:focus {
-  outline: 2px solid #8bc34a;
+input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
 }
 
-input[type="datetime-local"],
+input[type="radio"] {
+  margin-right: 5px;
+  vertical-align: middle;
+  margin-left: 20px;
+}
+
+label[for^="radio"] {
+  margin-right: 10px;
+}
+
+br {
+  display: none;
+  /* hide the <br> tag */
+}
+
+/* Textarea styles */
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Select styles */
 select {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 16px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-  box-shadow: 0 0 0 2px #4CAF50;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  color: #333333;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
 
+/* Button styles */
+button[type="submit"] {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-heading);
+  color: var(--color-background);
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button[type="submit"]:hover {
+  background-color: var(--color-border-hover);
+  cursor: pointer;
+}
+
+/* Fieldset styles */
+fieldset {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+}
+
+/* Legend styles */
+legend {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: var(--color-heading);
 }
 
 
-select option {
-  font-family: 'Roboto', sans-serif;
-  background-color: #4CAF50;
-  outline: none;
-  border: none;
+/* Radio button styles */
+input[type="radio"]+label {
+  font-weight: normal;
   color: var(--color-text);
 }
 
-select option:focus {
+.hosts-section {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  padding: 20px;
+  margin-bottom: 10px;
+}
+
+.hosts-section label {
+  display: block;
+  font-weight: bold;
+  color: var(--color-heading);
+  margin-bottom: 10px;
+}
+
+.hosts-section input[type="text"] {
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  padding: 5px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: var(--color-text);
+  background-color: var(--color-background-soft);
   outline: none;
-  border: none;
 }
 
-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 14px 20px;
-  margin: 8px 0;
+.hosts-section input[type="text"]:active {
+  outline: none;
+}
+
+.hosts-section button {
+  background-color: var(--color-background-mute);
   border: none;
-  border-radius: 4px;
+  color: var(--color-text);
+  padding: 5px 10px;
+  font-size: 16px;
   cursor: pointer;
-  width: 100%;
+  margin-bottom: 10px;
 }
 
-button:hover {
-  background-color: #45a049;
+.hosts-section button:hover {
+  background-color: var(--color-border-hover);
+}
+
+/* Error message styles */
+.error {
+  color: red;
+  margin-top: 10px;
 }
 </style>

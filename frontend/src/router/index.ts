@@ -3,10 +3,12 @@ import HomeView from '../views/HomeView.vue'
 import DiscoverViewVue from '@/views/DiscoverView.vue'
 import DashboardViewVue from '@/views/DashboardView.vue'
 import ExperienceViewVue from '@/views/ExperienceView.vue'
+import useStore from '@/stores/store'
+import store from '@/stores/store'
 
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+const router = createRouter( {
+  history: createWebHistory( import.meta.env.BASE_URL ),
   routes: [
     {
       path: '/',
@@ -21,7 +23,7 @@ const router = createRouter({
     {
       path: '/experience/:id',
       name: 'ExperienceDetails',
-      component:ExperienceViewVue ,
+      component: ExperienceViewVue,
     },
     {
       path: '/dashboard',
@@ -29,7 +31,10 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: DashboardViewVue
+      component: DashboardViewVue,
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: '/about',
@@ -37,9 +42,30 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
+      component: () => import( '../views/AboutView.vue' )
     }
   ]
-})
+} )
+
+router.beforeEach( async ( to, from, next ) =>
+{
+  const store = useStore()
+  if ( to.matched.every( ( match ) => match.meta.requiresAuth )){
+    try {
+      await store.sVerifyUser()
+    }catch(err){
+      next({path:'/'})
+      return
+    }
+    if(store.isLoggedIn()) {
+      next()
+      return
+    }
+    next({path:'/'})
+    return
+  }
+  next()
+  return
+} )
 
 export default router

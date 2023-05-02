@@ -16,13 +16,13 @@ export class RoomConfig {
     @IsString()
     roomDescription?: string;
 
-    @IsOptional()
+    @IsDefined()
     @IsDate()
-    startTime?: Date;
+    startTime!: Date;
 
-    @IsOptional()
+    @IsDefined()
     @IsDate()
-    expiryTime?: Date;
+    expiryTime!: Date;
 
     @IsDefined()
     hostWallets!: User[];
@@ -64,5 +64,5 @@ export class RoomConfig {
 
     @IsDefined()
     @IsInt()
-    experianceId!: number;
+    experienceId!: number;
 }

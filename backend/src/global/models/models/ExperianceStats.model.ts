@@ -20,13 +20,13 @@ export class ExperianceStats {
     @IsInt()
     overallRating!: number;
 
-    @IsOptional()
+    @IsDefined()
     @IsDate()
-    startTime?: Date;
+    startTime!: Date;
 
-    @IsOptional()
+    @IsDefined()
     @IsDate()
-    expiryTime?: Date;
+    expiryTime!: Date;
 
     @IsOptional()
     @IsDate()

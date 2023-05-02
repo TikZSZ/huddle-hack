@@ -78,6 +78,47 @@ async function main ()
     }
   } )
 
+  await prisma.experience.create( {
+    data: {
+      expTitle: "Alpha Experiance",
+      tokenGatedRecording: true,
+      tokenGatedRoom: false,
+      expDescription: "This is a non gated room",
+      ownerId: user.id,
+      participantsAllowed: 50,
+      hosts: { connectOrCreate: hosts },
+      recordingMetadata: { create: { tokenGatedRecording: true, chain: "FILECOIN_HYPERSPACE", tokenType: "REC20", contractAddress: "0xD723552acce3f08bb9A505a79eC675C7974919a4" } },
+      roomConfig: {
+        create: {
+          roomTitle: "Alpha Experiance",
+          startTime,
+          expiryTime,
+          hostWallets: { connect: { ethAddress: user.ethAddress } },
+          roomDescription: "This is a non gated room",
+        }
+      },
+      experianceStats: { create: { experianceStatus: "FINISHED", expiryTime, startTime, } },
+      recordings: {
+        createMany: {
+          data: [
+            {
+              dateRecorded: new Date(),
+              recTitle: "Init",
+              recContractId: 1,
+              recDescription: "First Recording"
+            },
+            {
+              dateRecorded: new Date(),
+              recTitle: "Follow UP",
+              recContractId: 2,
+              recDescription: "Second Recording"
+            }
+          ]
+        }
+      }
+    }
+  } )
+
   console.log( experaince );
 
 

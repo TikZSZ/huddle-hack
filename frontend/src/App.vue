@@ -92,7 +92,7 @@ onMounted( async () =>
         <div class="navbar-menu">
           <RouterLink to="/">Home</RouterLink>
           <RouterLink to="/discover">Discover</RouterLink>
-          <RouterLink to="/dashboard">Dashboard</RouterLink>
+          <RouterLink v-if="store.isLoggedIn()" to="/dashboard">Dashboard</RouterLink>
         </div>
         <div class="navbar-account">
           <div v-if="store.isLoggedIn()" style="display: flex;">
