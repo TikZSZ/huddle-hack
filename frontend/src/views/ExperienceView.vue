@@ -43,6 +43,7 @@ const experience: Ref<Experience> = ref( {
 
 const recordings: Ref<Recordings | null> = ref( null )
 const downloadAnchorTag: Ref<HTMLAnchorElement | null> = ref( null )
+const joinRoomRef: Ref<HTMLAnchorElement | null> = ref( null )
 
 function triggerDownload ( url: string )
 {
@@ -72,6 +73,22 @@ async function downloadRecording ( recId: number )
   }
 }
 
+async function redirectToMeetPage ()
+{
+  if ( !joinRoomRef.value ) return
+  joinRoomRef.value.target = "__blank"
+  joinRoomRef.value.href = "https://www.huddle01.com/"
+  joinRoomRef.value.click()
+}
+
+async function initiateRoom(){
+
+}
+
+async function wrapUp(){
+  
+}
+
 onMounted( async () =>
 {
   const exp = await getExperience( parseInt( id as string ) )
@@ -96,6 +113,7 @@ onMounted( async () =>
           </div>
           <section class="experience-stats">
             <div class="stats-content">
+
               <div class="rating">
                 <div class="rating-stars">
                   <template v-for="i in Math.ceil( experience.experianceStats.overallRating - 0.5 )">
@@ -137,22 +155,10 @@ onMounted( async () =>
   { hour: '2-digit', minute: '2-digit' } ) }}</span>
               </div>
               <div class="status">
-                <template v-if="experience.experianceStats.experianceStatus === 'FINISHED'">
-                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path fill="#FF0000"
-                      d="M12,0C5.383,0,0,5.383,0,12s5.383,12,12,12s12-5.383,12-12S18.617,0,12,0z M16.586,7.414l-6,6l-3.293-3.293   C7.105,9.105,6.553,9,6,9s-1.105,0.105-1.293,0.293l-1,1C3.105,10.488,3,10.744,3,11s0.105,0.512,0.293,0.707l4,4   C7.488,15.895,7.744,16,8,16s0.512-0.105,0.707-0.293l7-7C16.895,8.488,17,8.232,17,8S16.895,7.512,16.586,7.414z" />
-                  </svg>
-                  <span class="status-text" :style="{ color: '#FF0000' }">Inactive</span>
-                </template>
-                <template v-else>
-                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path fill="#00FF00"
-                      d="M12,0C5.383,0,0,5.383,0,12s5.383,12,12,12s12-5.383,12-12S18.617,0,12,0z M19,11h-6V5c0-0.552-0.448-1-1-1s-1,0.448-1,1v6H5c-0.552,0-1,0.448-1,1s0.448,1,1,1h6v6c0,0.552,0.448,1,1,1s1-0.448,1-1v-6h6c0.552,0,1-0.448,1-1S19.552,11,19,11z" />
-                  </svg>
-                  <span class="status-text" :style="{ color: '#00FF00' }">
-                    Active
-                  </span>
-                </template>
+                <button v-if="experience.experianceStats.experianceStatus === 'ONGOING' && experience.roomId" class="join-room"
+                  @click="redirectToMeetPage">Join Room</button>
+                <button v-else class="join-room-inactive" @click="redirectToMeetPage">Inactive</button>
+                <a href="" ref="joinRoomRef" hidden></a>
               </div>
             </div>
           </section>
@@ -167,17 +173,14 @@ onMounted( async () =>
         <button v-if="roomInfo && isHost" class="end-room" @click="endRoom">End Room</button>
       </div> -->
       <section class="host-buttons">
-        <button class="create-room"
-          v-if="store.isLoggedIn() && experience.experianceStats.experianceStatus === 'FINISHED' && experience.ownerId == store.user!.id">Initiate
-          Room
+        <button class="create-room" @click="initiateRoom()"
+          v-if="store.isLoggedIn() && experience.experianceStats.experianceStatus === 'FINISHED' && experience.ownerId == store.user!.id">
+          Initiate Room
         </button>
-        <button class="end-room"
-          v-if="store.isLoggedIn() && experience.experianceStats.experianceStatus === 'ONGOING' && experience.ownerId == store.user!.id">Initiate
-          Room
-          >
-          Wrap Up!
+        <button class="end-room" @click="wrapUp()"
+          v-if="store.isLoggedIn() && experience.experianceStats.experianceStatus === 'ONGOING' && experience.ownerId == store.user!.id">
+          Initiate Wrap Up!
         </button>
-        <button v-if="experience.experianceStats.experianceStatus === 'ONGOING'" class="join-room">Join Room</button>
       </section>
 
       <section class="hosts">
@@ -381,13 +384,27 @@ button {
 }
 
 .join-room {
-  background-color: hsla(160, 100%, 37%, 1);
-  color: white;
-  border: 2px solid hsla(160, 100%, 37%, 1);
+  margin-top: 10px;
+  background-color: var(--color-background);
+  color: #00FF00;
+  font-weight: 600;
+  border: 2px solid var(--color-background);
+  border-radius: 10px;
 }
 
 .join-room:hover {
-  background-color: hsla(160, 100%, 47%, 1);
+  background-color: var(--color-background-soft);
+  border: 2px solid var(--color-background-soft);
+}
+
+
+.join-room-inactive {
+  margin-top: 10px;
+  background-color: var(--color-background);
+  color: #FF0000;
+  font-weight: 600;
+  border: 2px solid var(--color-background);
+  border-radius: 10px;
 }
 
 .end-room {
