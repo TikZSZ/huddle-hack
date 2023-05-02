@@ -5,6 +5,35 @@ export type User = {
   nonce: string
 }
 
+export type Recordings = {
+  id: number;
+  recTitle: string;
+  recDescription: string;
+  dateRecorded: string;
+}[]
+
+export interface RecordingResponse {
+  recMetadata: RecMetadata;
+  recording: BaseRecording|null;
+  recContractId: number;
+}
+
+interface BaseRecording {
+  id: number;
+  recTitle: string;
+  recDescription: string;
+  dateRecorded: string;
+  url: string;
+}
+
+interface RecMetadata {
+  id: number;
+  chain: string;
+  tokenType: string;
+  contractAddress: string;
+  tokenGatedRecording: boolean;
+}
+
 export type Experiences = Omit<Experience,"roomConfig"|"recordingMetadata"|"recordings"|"">[]
 export interface Experience {
   id: number;

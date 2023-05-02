@@ -32,7 +32,7 @@ export class ExperiencesController
   @Get( "/:experienceId/recordings" )
   getRecordings ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
   {
-    return this.prisma.recording.findMany( { where: { experienceId }, select: { recTitle: true, recDescription: true,  dateRecorded: true} } )
+    return this.prisma.recording.findMany( { where: { experienceId }, select: { id:true,recTitle: true, recDescription: true,  dateRecorded: true} } )
   }
 
   @Get( "/:experienceId/recordings/:recordId" )

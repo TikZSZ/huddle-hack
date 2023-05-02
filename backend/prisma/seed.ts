@@ -43,7 +43,7 @@ async function main ()
       ownerId: user.id,
       participantsAllowed: 50,
       hosts: { connectOrCreate: hosts },
-      recordingMetadata: { create: { tokenGatedRecording: true,chain:"FILECOIN_HYPERSPACE",tokenType:"REC20",contractAddress:"" } },
+      recordingMetadata: { create: { tokenGatedRecording: true, chain: "FILECOIN_HYPERSPACE", tokenType: "REC20", contractAddress: "" } },
       roomConfig: {
         create: {
           roomTitle: "Beta Experiance",
@@ -57,12 +57,24 @@ async function main ()
         }
       },
       experianceStats: { create: { experianceStatus: "FINISHED", expiryTime, startTime, } },
-      recordings:{create:{
-        dateRecorded:new Date(),
-        recTitle:"Init",
-        recContractId:1,
-        recDescription:"First Recording"
-      }}
+      recordings: {
+        createMany: {
+          data: [
+            {
+              dateRecorded: new Date(),
+              recTitle: "Init",
+              recContractId: 1,
+              recDescription: "First Recording"
+            },
+            {
+              dateRecorded: new Date(),
+              recTitle: "Follow UP",
+              recContractId: 2,
+              recDescription: "Second Recording"
+            }
+          ]
+        }
+      }
     }
   } )
 
