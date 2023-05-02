@@ -32,28 +32,30 @@ export class ExperiencesController
   @Get( "/:experienceId/recordings" )
   getRecordings ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
   {
-    return this.prisma.recording.findMany( { where: { experienceId }, select: { id:true,recTitle: true, recDescription: true,  dateRecorded: true} } )
+    return this.prisma.recording.findMany( { where: { experienceId }, select: { id: true, recTitle: true, recDescription: true, dateRecorded: true } } )
   }
 
   @Get( "/:experienceId/recordings/:recordId" )
-  async getRecording ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number,@Param( "recordId", new ParseIntPipe() ) recordId: number )
+  async getRecording ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @Param( "recordId", new ParseIntPipe() ) recordId: number )
   {
-    const recMetadata = await this.prisma.recordingMetadata.findUnique({where:{experienceId:experienceId}})
-    if(!recMetadata) throw new BadRequestException()
+    const recMetadata = await this.prisma.recordingMetadata.findUnique( { where: { experienceId: experienceId } } )
+    if ( !recMetadata ) throw new BadRequestException()
 
-    const recording = await this.prisma.recording.findUnique({where:{id:recordId}})
-    if(!recording) throw new NotFoundException()
+    const recording = await this.prisma.recording.findUnique( { where: { id: recordId } } )
+    if ( !recording ) throw new NotFoundException()
 
-    if(!recMetadata.tokenGatedRecording){
-      return {recMetadata,recording}
+    if ( !recMetadata.tokenGatedRecording )
+    {
+      return { recMetadata, recording }
     }
-    if(recMetadata.tokenType !== "REC20") { 
-      throw new BadRequestException("Not implemented")
+    if ( recMetadata.tokenType !== "REC20" )
+    {
+      throw new BadRequestException( "Not implemented" )
       // backend checks and then return url for download
       // return {recMetadata,recording}
     }
-    if(!recording.recContractId) throw new NotFoundException()
-    return {recMetadata,recording:null,recContractId:recording!.recContractId}
+    if ( !recording.recContractId ) throw new NotFoundException()
+    return { recMetadata, recording: null, recContractId: recording!.recContractId }
   }
 
   @Patch( "/:experienceId/stats" )
@@ -65,14 +67,29 @@ export class ExperiencesController
 
   @Patch( "/:experienceId/initMeet" )
   @UseGuards( AuthGuard )
-  initMeet ( @Body() data: InitMeetDTO, @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @GetJwtToken() jwtToken: JwtToken )
+  async initMeet ( @Body() data: InitMeetDTO, @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @GetJwtToken() jwtToken: JwtToken )
   {
-    const userId = jwtToken.userId
+    const exp = await this.prisma.experience.findUnique( { where: { id: experienceId } } )
+    if ( !exp ) throw new NotFoundException()
+    const roomCreationTime = new Date()
     return this.prisma.experience.update( {
       where: { id: experienceId }, data: {
         roomId: data.roomId,
-        experianceStats: { update: { experianceStatus: data.experianceStatus } },
-        roomCreationTime: ( new Date() ).toISOString()
+        experianceStats: { update: { experianceStatus: "ONGOING", lastMeet: roomCreationTime.toISOString() } },
+        roomCreationTime: roomCreationTime.toISOString()
+      }
+    } )
+  }
+
+  @Patch( "/:experienceId/wrapUp" )
+  @UseGuards( AuthGuard )
+  async wrapUp ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @GetJwtToken() jwtToken: JwtToken )
+  {
+    const exp = await this.prisma.experience.findUnique( { where: { id: experienceId } } )
+    if ( !exp ) throw new NotFoundException()
+    return this.prisma.experience.update( {
+      where: { id: experienceId }, data: {
+        experianceStats: { update: { experianceStatus: "FINISHED" } },
       }
     } )
   }
@@ -91,16 +108,16 @@ export class ExperiencesController
         ethAddress: string,
         nonce: string
       }
-    }[] = [ { where:{ethAddress: user.ethAddress},create:{ethAddress:user.ethAddress,nonce:""} } ]
+    }[] = [ { where: { ethAddress: user.ethAddress }, create: { ethAddress: user.ethAddress, nonce: "" } } ]
     if ( hosts.length > 0 )
     {
       hosts.map( ( hostAddress ) =>
       {
         verifiedHosts.push( {
-          where:{ethAddress:hostAddress},
-          create:{
-            ethAddress:hostAddress,
-            nonce:""
+          where: { ethAddress: hostAddress },
+          create: {
+            ethAddress: hostAddress,
+            nonce: ""
           }
         } )
       } )

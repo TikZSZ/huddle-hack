@@ -8,11 +8,8 @@ export class InitMeetDTO
   @IsDefined()
   @IsString()
   roomId: string
-
-  @IsDefined()
-  @IsIn( getEnumValues( ExperianceStatus ) )
-  experianceStatus!: ExperianceStatus;
 }
+
 
 export class RoomConfig {
 
