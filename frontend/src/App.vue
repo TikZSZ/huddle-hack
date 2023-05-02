@@ -23,7 +23,7 @@ async function handleMetamaskLogin ()
       throw new Error( error )
     }
     const provider = new BrowserProvider( window.ethereum )
-    await provider.send("wallet_switchEthereumChain",[{chainId:"0x1"}])
+    await provider.send( "wallet_switchEthereumChain", [ { chainId: "0x1" } ] )
     await provider.send( "eth_requestAccounts", [] )
     const accounts = await provider.listAccounts()
     const account = accounts[ 0 ];
@@ -71,11 +71,15 @@ async function handleMetamaskLogin ()
 onMounted( async () =>
 {
   await store.sVerifyUser()
-  console.log(store.walletConnected);
-  
   if ( window.ethereum )
   {
+    store.updateMetaMaskExists(true)
     store.updateWalletConnectionStatus( window.ethereum.isConnected() )
+  } else
+  {
+    store.updateMetaMaskExists(false)
+    metaMaskButtonText.value = "Metamask wallet not detected!"
+    metaMaskLoginDisabled.value = true
   }
 } )
 </script>
@@ -87,16 +91,15 @@ onMounted( async () =>
         <a class="navbar-brand" href="#">My Site</a>
         <div class="navbar-menu">
           <RouterLink to="/">Home</RouterLink>
-          <!-- <a href="#">Discover</a> -->
-          <!-- <a href="#">Dashboard</a> -->
           <RouterLink to="/discover">Discover</RouterLink>
           <RouterLink to="/dashboard">Dashboard</RouterLink>
         </div>
         <div class="navbar-account">
           <div v-if="store.isLoggedIn()" style="display: flex;">
             <AccountIcon alt="User Avatar" />
-            
-            <span style="margin-left: 5px;">{{ `${store.user?.ethAddress.substring(0,6)}...${store.user?.ethAddress.substring(6,10)}`  }}</span>
+
+            <span style="margin-left: 5px;">{{
+              `${store.user?.ethAddress.substring( 0, 6 )}...${store.user?.ethAddress.substring( 6, 10 )}` }}</span>
           </div>
           <div v-else>
             <button :class="{ 'normal-state': !metaMaskLoginDisabled, 'error-state': metaMaskLoginDisabled }"
@@ -157,6 +160,7 @@ header {
   text-decoration: none;
   margin-left: 20px;
   padding: 5px 10px;
+  font-size: 1.5rem;
 }
 
 .navbar-menu a:hover {
@@ -172,7 +176,7 @@ header {
 
 .navbar-account span {
   color: var(--vt-c-white-mute);
-  font-size: 14px;
+  font-size: 1rem;
   margin-right: 10px;
 }
 
@@ -199,7 +203,6 @@ header {
 }
 
 .login-button {
-
   color: white;
   border: none;
   border-radius: 4px;

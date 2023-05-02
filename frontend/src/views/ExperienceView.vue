@@ -136,6 +136,24 @@ onMounted( async () =>
                 } ) }} - {{ new Date( experience.experianceStats.expiryTime ).toLocaleTimeString( [],
   { hour: '2-digit', minute: '2-digit' } ) }}</span>
               </div>
+              <div class="status">
+                <template v-if="experience.experianceStats.experianceStatus === 'FINISHED'">
+                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path fill="#FF0000"
+                      d="M12,0C5.383,0,0,5.383,0,12s5.383,12,12,12s12-5.383,12-12S18.617,0,12,0z M16.586,7.414l-6,6l-3.293-3.293   C7.105,9.105,6.553,9,6,9s-1.105,0.105-1.293,0.293l-1,1C3.105,10.488,3,10.744,3,11s0.105,0.512,0.293,0.707l4,4   C7.488,15.895,7.744,16,8,16s0.512-0.105,0.707-0.293l7-7C16.895,8.488,17,8.232,17,8S16.895,7.512,16.586,7.414z" />
+                  </svg>
+                  <span class="status-text" :style="{ color: '#FF0000' }">Inactive</span>
+                </template>
+                <template v-else>
+                  <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path fill="#00FF00"
+                      d="M12,0C5.383,0,0,5.383,0,12s5.383,12,12,12s12-5.383,12-12S18.617,0,12,0z M19,11h-6V5c0-0.552-0.448-1-1-1s-1,0.448-1,1v6H5c-0.552,0-1,0.448-1,1s0.448,1,1,1h6v6c0,0.552,0.448,1,1,1s1-0.448,1-1v-6h6c0.552,0,1-0.448,1-1S19.552,11,19,11z" />
+                  </svg>
+                  <span class="status-text" :style="{ color: '#00FF00' }">
+                    Active
+                  </span>
+                </template>
+              </div>
             </div>
           </section>
         </div>
@@ -149,9 +167,17 @@ onMounted( async () =>
         <button v-if="roomInfo && isHost" class="end-room" @click="endRoom">End Room</button>
       </div> -->
       <section class="host-buttons">
-        <button class="create-room">Initiate Meet</button>
-        <button class="end-room">End Room</button>
-        <button class="join-room">Join Room</button>
+        <button class="create-room"
+          v-if="store.isLoggedIn() && experience.experianceStats.experianceStatus === 'FINISHED' && experience.ownerId == store.user!.id">Initiate
+          Room
+        </button>
+        <button class="end-room"
+          v-if="store.isLoggedIn() && experience.experianceStats.experianceStatus === 'ONGOING' && experience.ownerId == store.user!.id">Initiate
+          Room
+          >
+          Wrap Up!
+        </button>
+        <button v-if="experience.experianceStats.experianceStatus === 'ONGOING'" class="join-room">Join Room</button>
       </section>
 
       <section class="hosts">
@@ -290,12 +316,14 @@ onMounted( async () =>
 .participants-count {
   font-size: 20px;
   margin-left: 5px;
+  margin-top: 10px;
 }
 
 .time {
   display: flex;
   align-items: center;
   margin-right: 10px;
+  margin-top: 8px;
 }
 
 .time-count {
@@ -303,6 +331,22 @@ onMounted( async () =>
   margin-left: 5px;
 }
 
+.status {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.status .icon {
+  width: 26px;
+  height: 26px;
+  margin-right: 5px;
+}
+
+.status-text {
+  font-size: 20px;
+  margin-left: 5px;
+}
 
 .section-parent {
   background-color: var(--color-background);

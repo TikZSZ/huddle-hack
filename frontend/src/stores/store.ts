@@ -33,9 +33,15 @@ export default defineStore('counter', () => {
     }
   }
 
+  const MetaMaskExists = ref(false)
+
   function updateWalletConnectionStatus(val:boolean){
     walletConnected.value = val
   }
 
-  return { count, doubleCount, increment,isLoggedIn,user,loginUser,sVerifyUser, walletConnected,updateWalletConnectionStatus }
+  function updateMetaMaskExists(val:boolean){
+    MetaMaskExists.value = val
+  }
+
+  return { count, doubleCount, increment,isLoggedIn,user,loginUser,sVerifyUser, walletConnected,updateWalletConnectionStatus,MetaMaskExists,updateMetaMaskExists }
 })
