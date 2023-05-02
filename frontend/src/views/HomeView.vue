@@ -39,10 +39,10 @@ const recContract = new RecordingsContract( { name: "RecToken", symbol: "REC",co
 const count = await recContract.getCurrentCount()
 console.log(count);
 
-// const rec1 = await recContract.addRecording(1,"adad")
-// console.log(rec1);
+const rec1 = await recContract.addRecording(count+1,"https://amazonnews234")
+console.log(rec1);
 
-const rec2 = await recContract.getRecording(1)
+const rec2 = await recContract.getRecording(2)
 console.log(rec2);
 
 

@@ -1,4 +1,4 @@
-import { BrowserProvider, ContractFactory, Contract } from "ethers";
+import { BrowserProvider, ContractFactory, Contract,toNumber } from "ethers";
 import ContractJSON from "./Recordings.json";
 
 export class RecordingsContract
@@ -37,7 +37,8 @@ export class RecordingsContract
       ContractJSON.abi,
       signer
     );
-    await contract.addRecording( id, url );
+    const recordCall = await contract.addRecording( id, url );
+    await recordCall.wait()
   }
 
   async getRecording ( id: number ): Promise<string>
@@ -68,8 +69,8 @@ export class RecordingsContract
       ContractJSON.abi,
       signer
     );
-    const recording = await contract.getCurrentCount();
-    return recording;
+    const count = await contract.getCurrentCount();
+    return toNumber(count)
   }
 }
 
