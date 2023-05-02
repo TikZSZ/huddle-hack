@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { CreateIFrameRoom, CreateTokenGatedIFrameRoom, Experience, Experiences, RecordingResponse, Recordings, RoomConfig, User } from "./types"
+import type { CreateIFrameRoom, CreateTokenGatedIFrameRoom, Experience, Experiences, ICreateExperience, RecordingResponse, Recordings, RoomConfig, User } from "./types"
 
 const baseURL = "http://localhost:5000"
 const api = axios.create( {
@@ -72,13 +72,24 @@ export async function wrapUp ( expId: number )
 export async function createIFrameRoom ( iframeConfig: CreateIFrameRoom | CreateTokenGatedIFrameRoom )
 {
   //VwTZ4AGTxme9snANex9tep3NwvVMGfYd
-  const { data } = await api.post<{ message: string, data:{
-    roomId:string,meetingLink?:string
-  } }>( `https://iriko.testing.huddle01.com/api/v1/create-iframe-room`, { ...iframeConfig }, {
+  const { data } = await api.post<{
+    message: string, data: {
+      roomId: string, meetingLink?: string
+    }
+  }>( `https://iriko.testing.huddle01.com/api/v1/create-iframe-room`, { ...iframeConfig }, {
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': "VwTZ4AGTxme9snANex9tep3NwvVMGfYd",
     },
   } )
   return data
+}
+
+
+
+
+export async function createExperience ( data: ICreateExperience )
+{
+  const { data: resp } = await api.post<Experience>( `/experiences/`, data )
+  return resp
 }

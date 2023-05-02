@@ -52,6 +52,63 @@ export interface Experience {
   // owner: Host;
 }
 
+export interface ICreateExperience
+{
+  expTitle: string;
+  expDescription?: string;
+  participantsAllowed?: number;
+  tokenGatedRoom: boolean;
+  tokenGatedRecording: boolean;
+  startTime:string;
+  endTime:string;
+  hosts: string[];
+  recordingMetadata: {
+    chain?: string;
+    tokenType?: string;
+    contractAddress?: string;
+  };
+  roomConfig: {
+    roomLocked: boolean;
+    muteOnEntry: boolean;
+    videoOnEntry: boolean;
+    tokenType?: string;
+    chain?: string;
+    contractAddress?: string;
+    conditionType?: string;
+    conditionValue?: string;
+  }
+}
+
+export interface IRoomCreation
+{
+  tokenGatedRecording: boolean;
+  recordingMetadata: RecordingMetadatad;
+  roomConfig: RoomConfigd;
+  expTitle: string;
+  tokenGatedRoom: boolean;
+  expDescription: string;
+  startTime: string;
+  expiryTime: string;
+  participantsAllowed: number;
+  hosts: string[]
+}
+
+interface RoomConfigd
+{
+  roomLocked: boolean;
+  videoOnEntry: boolean;
+  muteOnEntry: boolean;
+  tokenType: string;
+  chain: string;
+  contractAddress: string;
+}
+
+interface RecordingMetadatad
+{
+  tokenType: string;
+  chain: string;
+}
+
 export enum Chain {
   ETHEREUM = "ETHEREUM",
   COSMOS = "COSMOS",
@@ -69,7 +126,6 @@ export enum TokenType {
   BEP20 = "BEP20",
   REC20 = "REC20"
 }
-
 
 export interface RoomConfig {
   id: number;

@@ -1,37 +1,9 @@
 <script lang="ts" setup>
 import useStore from '@/stores/store';
-import { type Experience, Chain, TokenType } from '@/utils/types';
+import { type Experience, Chain, TokenType, type IRoomCreation } from '@/utils/types';
 import { ref, type Ref, computed } from 'vue';
+import {} from "@/utils/api"
 
-interface IRoomCreation
-{
-  tokenGatedRecording: boolean;
-  recordingMetadata: RecordingMetadata;
-  roomConfig: RoomConfig;
-  expTitle: string;
-  tokenGatedRoom: boolean;
-  expDescription: string;
-  startTime: string;
-  expiryTime: string;
-  participantsAllowed: number;
-  hosts: string[]
-}
-
-interface RoomConfig
-{
-  roomLocked: boolean;
-  videoOnEntry: boolean;
-  muteOnEntry: boolean;
-  tokenType: string;
-  chain: string;
-  contractAddress: string;
-}
-
-interface RecordingMetadata
-{
-  tokenType: string;
-  chain: string;
-}
 const store = useStore()
 const userAddress = store.user!.ethAddress 
 
@@ -86,12 +58,6 @@ function updateHost ( index: number, value: string )
   exp.value.hosts[ index ] = value
 }
 
-async function createExperience ()
-{
-  console.log( JSON.parse( JSON.stringify( exp.value ) ) );
-
-}
-
 function getEnumValues<T> ( enumType: T ): Array<string>
 {
   return [
@@ -102,7 +68,13 @@ function getEnumValues<T> ( enumType: T ): Array<string>
     ),
   ] as any
 }
-console.log( getEnumValues( Chain ) );
+
+async function createExperience ()
+{
+  console.log( JSON.parse( JSON.stringify( exp.value ) ) );
+  createExperience()
+}
+
 
 
 </script>
@@ -135,6 +107,30 @@ console.log( getEnumValues( Chain ) );
 
       <label>Expiry Time:</label>
       <input type="datetime-local" v-model="exp.expiryTime"><br>
+
+      <div class="checkbox-label">
+          <label>Room Locked:</label>
+          <div class="checkbox-container">
+            <input id="room-locked" type="checkbox" v-model="exp.roomConfig.roomLocked">
+            <label for="room-locked" class="checkbox-icon"></label>
+          </div>
+        </div>
+
+        <div class="checkbox-label">
+          <label>Mute on Entry:</label>
+          <div class="checkbox-container">
+            <input id="mute-entry" type="checkbox" v-model="exp.roomConfig.muteOnEntry">
+            <label for="mute-entry" class="checkbox-icon"></label>
+          </div>
+        </div>
+
+        <div class="checkbox-label">
+          <label>Video on Entry:</label>
+          <div class="checkbox-container">
+            <input id="video-entry" type="checkbox" v-model="exp.roomConfig.videoOnEntry">
+            <label for="video-entry" class="checkbox-icon"></label>
+          </div>
+        </div>
 
       <div class="checkbox-label">
         <label>Token Gated Recording:</label>
@@ -176,30 +172,6 @@ console.log( getEnumValues( Chain ) );
 
       <label>Room Configuration:</label>
       <fieldset>
-        <div class="checkbox-label">
-          <label>Room Locked:</label>
-          <div class="checkbox-container">
-            <input id="room-locked" type="checkbox" v-model="exp.roomConfig.roomLocked">
-            <label for="room-locked" class="checkbox-icon"></label>
-          </div>
-        </div>
-
-        <div class="checkbox-label">
-          <label>Mute on Entry:</label>
-          <div class="checkbox-container">
-            <input id="mute-entry" type="checkbox" v-model="exp.roomConfig.muteOnEntry">
-            <label for="mute-entry" class="checkbox-icon"></label>
-          </div>
-        </div>
-
-        <div class="checkbox-label">
-          <label>Video on Entry:</label>
-          <div class="checkbox-container">
-            <input id="video-entry" type="checkbox" v-model="exp.roomConfig.videoOnEntry">
-            <label for="video-entry" class="checkbox-icon"></label>
-          </div>
-        </div>
-
         <template v-if="exp.tokenGatedRoom">
           <label class="radio-label">Token Type:</label>
           <div class="radio-group">
