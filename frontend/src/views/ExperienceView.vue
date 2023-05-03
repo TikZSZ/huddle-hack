@@ -2,13 +2,15 @@
 import { getExperience, getRecording, getRecordings, getRoomConfig, wrapUp as wrapUpAPI, initMeet as initMeetAPI, createIFrameRoom } from '@/utils/api';
 import type { Experience, RecordingResponse, Recordings } from '@/utils/types';
 import { onMounted, ref, type Ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import useStore from "@/stores/store"
 import RecordingsContract from '@/contract/RecordingsContract';
 import axios from 'axios';
 
 const store = useStore()
 const route = useRoute()
+const router = useRouter()
+
 console.log( route.params );
 const id = route.params.id
 
@@ -109,14 +111,7 @@ async function initMeet ()
 
 async function wrapUp ()
 {
-  try
-  {
-    const exp = await wrapUpAPI( experience.value.id )
-    experience.value = exp
-  } catch ( err )
-  {
-    console.error( err )
-  }
+  router.push( { name: "WrapUp", params: { id: experience.value.id } } )
 }
 
 onMounted( async () =>

@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import DiscoverViewVue from '@/views/DiscoverView.vue'
 import DashboardViewVue from '@/views/DashboardView.vue'
 import ExperienceViewVue from '@/views/ExperienceView.vue'
+import WrapUpViewVue from "@/views/WrapUp.vue"
 import useStore from '@/stores/store'
 import store from '@/stores/store'
 
@@ -24,6 +25,11 @@ const router = createRouter( {
       path: '/experience/:id',
       name: 'ExperienceDetails',
       component: ExperienceViewVue,
+    },
+    {
+      path: '/wrapup/:id',
+      name: 'WrapUp',
+      component: WrapUpViewVue,
     },
     {
       path: '/dashboard',

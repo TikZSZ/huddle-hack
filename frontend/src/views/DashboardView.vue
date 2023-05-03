@@ -265,12 +265,139 @@ async function createExperience ()
         <input type="text" v-model="exp.roomConfig.contractAddress">
       </fieldset>
 
-      <button type="submit">Save</button>
+      <button type="submit">Create New Experience!</button>
     </form>
   </div>
 </template>
 
 <style scoped>
+/* Overall form styles */
+
+.dashboard {
+  padding: 70px;
+}
+
+form {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--color-background);
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  font-size: 20px;
+}
+
+/* Label styles */
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: var(--color-heading);
+}
+
+/* Input styles */
+input[type="text"],
+input[type="number"],
+input[type="time"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: start;
+  justify-content: left;
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  appearance: none;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+br {
+  display: none;
+  /* hide the <br> tag */
+}
+
+/* Textarea styles */
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Select styles */
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-background-mute);
+  color: var(--color-text);
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Button styles */
+button[type="submit"] {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-heading);
+  color: var(--color-background);
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button[type="submit"]:hover {
+  background-color: var(--color-border-hover);
+  cursor: pointer;
+}
+
+/* Fieldset styles */
+fieldset {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+}
+
+/* Legend styles */
+legend {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: var(--color-heading);
+}
+
+
+/* Radio button styles */
+input[type="radio"]+label {
+  font-weight: normal;
+  color: var(--color-text);
+}
+
+
 .checkbox-label {
   display: flex;
   align-items: center;
@@ -289,7 +416,7 @@ async function createExperience ()
   width: 20px;
   height: 20px;
   margin-right: 10px;
-  top: 8px;
+  top: -4px;
 }
 
 .checkbox-container input[type="checkbox"] {
@@ -389,150 +516,6 @@ async function createExperience ()
   margin-right: 0;
 }
 
-/* Overall form styles */
-
-.dashboard {
-  padding: 70px;
-}
-
-form {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: var(--color-background);
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  font-size: 20px;
-}
-
-/* Label styles */
-label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: var(--color-heading);
-}
-
-/* Input styles */
-input[type="text"],
-input[type="number"],
-input[type="time"] {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: var(--color-background-mute);
-  color: var(--color-text);
-  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: start;
-  justify-content: left;
-}
-
-input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
-  appearance: none;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  transition: background-color 0.3s ease;
-}
-
-input[type="checkbox"]:checked {
-  background-color: #007bff;
-}
-
-input[type="checkbox"]:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
-}
-
-input[type="radio"] {
-  margin-right: 5px;
-  vertical-align: middle;
-  margin-left: 20px;
-}
-
-label[for^="radio"] {
-  margin-right: 10px;
-}
-
-br {
-  display: none;
-  /* hide the <br> tag */
-}
-
-/* Textarea styles */
-textarea {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: var(--color-background-mute);
-  color: var(--color-text);
-  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Select styles */
-select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: var(--color-background-mute);
-  color: var(--color-text);
-  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Button styles */
-button[type="submit"] {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin-top: 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: var(--color-heading);
-  color: var(--color-background);
-  font-weight: bold;
-  text-transform: uppercase;
-  transition: background-color 0.2s ease-in-out;
-}
-
-button[type="submit"]:hover {
-  background-color: var(--color-border-hover);
-  cursor: pointer;
-}
-
-/* Fieldset styles */
-fieldset {
-  margin-bottom: 20px;
-  padding: 20px;
-  border: 1px solid var(--color-border);
-  border-radius: 5px;
-}
-
-/* Legend styles */
-legend {
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: var(--color-heading);
-}
-
-
-/* Radio button styles */
-input[type="radio"]+label {
-  font-weight: normal;
-  color: var(--color-text);
-}
 
 .hosts-section {
   background-color: var(--color-background);
