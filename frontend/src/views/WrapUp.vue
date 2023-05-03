@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import RecordingsContract from '@/contract/RecordingsContract';
+import useStore from '@/stores/store';
 import { getExpRecMetadata, wrapUp as wrapUpAPI, type WrapUpData as APIWrapUpData } from '@/utils/api';
 import type { RecordingMetadata } from '@/utils/types';
-import { onMounted, ref, type Ref,onBeforeMount } from 'vue';
+import { onMounted, ref, type Ref, onBeforeMount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
 const route = useRoute()
 const router = useRouter()
-
+const store = useStore()
 interface WrapUpData
 {
   saveRecording: boolean
@@ -36,50 +38,64 @@ async function callWrapUpAPI ( id: number, data: APIWrapUpData )
 
 
 const recMetadata: Ref<RecordingMetadata | null> = ref( null )
-  
+
 async function wrapUp ()
 {
-  console.log( JSON.parse( JSON.stringify( wrapUpData.value ) ) );
-  const expId = route.params.id ? parseInt( route.params.id as string ) : null
-  if ( !expId ) throw new Error( "in valid exprience id" )
-  if(recMetadata.value === null) throw new Error("Rec metadata not found")
-  if ( !wrapUpData.value.saveRecording )
+  try
   {
-    await callWrapUpAPI( expId, { saveRecording: false, } )
-    return
-  }
-  if ( !recMetadata.value.tokenGatedRecording )
-  {
-    await callWrapUpAPI( expId, { ...wrapUpData.value } )
-    return
-  } else
-  {
-    try{
-    if ( !recMetadata.value.contractAddress || !wrapUpData.value.url ) throw new Error( "Contract address not found" )
-    const provider = await RecordingsContract.getProvider()
-    const recContract = new RecordingsContract( { contractAddress: recMetadata.value.contractAddress }, provider )
-    const count = await recContract.getCurrentCount()
-    console.log( count );
-    const recContractId = count + 1
-    const addRecording = await recContract.addRecording( recContractId, wrapUpData.value.url! )
-    const rec2 = await recContract.getRecording( recContractId )
-    console.log( rec2 );
-    await callWrapUpAPI(expId,{...wrapUpData.value,recContractId})
-    return 
-    }catch(err){
-      console.error(err)
+    store.showOverlay( true )
+    store.setLoaderMessage( "Wrapping Up" )
+    console.log( JSON.parse( JSON.stringify( wrapUpData.value ) ) );
+    const expId = route.params.id ? parseInt( route.params.id as string ) : null
+    if ( !expId ) throw new Error( "in valid exprience id" )
+    if ( recMetadata.value === null ) throw new Error( "Rec metadata not found" )
+    if ( !wrapUpData.value.saveRecording )
+    {
+      await callWrapUpAPI( expId, { saveRecording: false, } )
     }
+    else if ( !recMetadata.value.tokenGatedRecording )
+    {
+      await callWrapUpAPI( expId, { ...wrapUpData.value } )
+    } else
+    {
+      try
+      {
+        if ( !recMetadata.value.contractAddress || !wrapUpData.value.url ) throw new Error( "Contract address not found" )
+        const provider = await RecordingsContract.getProvider()
+        const recContract = new RecordingsContract( { contractAddress: recMetadata.value.contractAddress }, provider )
+        const count = await recContract.getCurrentCount()
+        console.log( count );
+        const recContractId = count + 1
+        store.setLoaderMessage( "Saving Recording to REC20 Smart Contract..." )
+        const addRecording = await recContract.addRecording( recContractId, wrapUpData.value.url! )
+        const rec2 = await recContract.getRecording( recContractId )
+        console.log( rec2 );
+        console.log( count );
+        console.log( { ...wrapUpData.value, recContractId } );
+        store.setLoaderMessage( "Almost Done" )
+        await callWrapUpAPI( expId, { ...wrapUpData.value, recContractId } )
+      } catch ( err )
+      {
+        console.error( err )
+      }
+    }
+    store.showOverlay( false )
+  } catch ( err )
+  {
+    console.log( err );
+    store.showOverlay( false )
   }
 }
 
 
-onMounted(async () => {
+onMounted( async () =>
+{
   console.log( JSON.parse( JSON.stringify( wrapUpData.value ) ) );
   const expId = route.params.id ? parseInt( route.params.id as string ) : null
   if ( !expId ) throw new Error( "in valid exprience id" )
   recMetadata.value = await getExpRecMetadata( expId )
   console.log( recMetadata );
-})
+} )
 
 </script>
 
@@ -105,8 +121,8 @@ onMounted(async () => {
           <label>Recording Description:</label>
           <input type="text" v-model="wrapUpData.recDescription">
 
-            <label >Recording URL:</label>
-            <input type="text" v-model="wrapUpData.url">
+          <label>Recording URL:</label>
+          <input type="text" v-model="wrapUpData.url">
 
           <!-- <div class="checkbox-label">
             <label>Make Recording Private</label>
@@ -365,4 +381,5 @@ input[type="radio"]+label {
 
 .radio-option:last-child {
   margin-right: 0;
-}</style>
+}
+</style>

@@ -22,6 +22,8 @@ async function handleMetamaskLogin ()
       metaMaskLoginDisabled.value = true
       throw new Error( error )
     }
+    store.showOverlay(true)
+    store.setLoaderMessage("Connecting....")
     const provider = new BrowserProvider( window.ethereum )
     await provider.send( "wallet_switchEthereumChain", [ { chainId: "0x1" } ] )
     await provider.send( "eth_requestAccounts", [] )
@@ -38,46 +40,24 @@ async function handleMetamaskLogin ()
     const data = { nonce, signature };
     const loggedUser = await loginUser( account.address, data )
     store.loginUser( loggedUser.user )
+    store.showOverlay(false)
   } catch ( err )
   {
     console.error( 'Failed to log in with Metamask', err );
-
+    store.showOverlay(false)
   }
 }
-
-// Network name
-// Filecoin - Hyperspace testnet
-// Network URL
-// https://filecoin-hyperspace.chainup.net/rpc/v1
-// Chain ID
-// 3141
-// Currency symbol
-// tFIL
-// window.ethereum.request({
-//     method: "wallet_addEthereumChain",
-//     params: [{
-//         chainId: "0x89",
-//         rpcUrls: ["https://rpc-mainnet.matic.network/"],
-//         chainName: "Matic Mainnet",
-//         nativeCurrency: {
-//             name: "MATIC",
-//             symbol: "MATIC",
-//             decimals: 18
-//         },
-//         blockExplorerUrls: ["https://polygonscan.com/"]
-//     }]
-// });
 
 onMounted( async () =>
 {
   await store.sVerifyUser()
   if ( window.ethereum )
   {
-    store.updateMetaMaskExists(true)
+    store.updateMetaMaskExists( true )
     store.updateWalletConnectionStatus( window.ethereum.isConnected() )
   } else
   {
-    store.updateMetaMaskExists(false)
+    store.updateMetaMaskExists( false )
     metaMaskButtonText.value = "Metamask wallet not detected!"
     metaMaskLoginDisabled.value = true
   }
@@ -111,11 +91,53 @@ onMounted( async () =>
     </header>
     <div class="content">
       <RouterView />
+
+    </div>
+    <div v-if="store.isLoading" class="loading-overlay">
+      <div class="loading-spinner"></div>
+      <p class="loading-message">{{ store.loaderMessage }}</p>
     </div>
   </div>
 </template>
 
 <style scoped>
+
+.loading-overlay {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.loading-spinner {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-message {
+  margin-top: 20px;
+  font-size: 24px;
+  color: white;
+  text-align: center;
+  width: 65%;
+}
+
 .app {
   width: 95%;
   margin: 0 auto;

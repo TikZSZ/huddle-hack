@@ -61,7 +61,7 @@ async function downloadRecording ( recId: number )
   //"https://i.ibb.co/N9byH6K/52437634tg.jpg"
   console.log( recId );
   const { recMetadata, recording, recContractId } = await getRecording( experience.value.id, recId )
-  if (  recording && !recording.url && recContractId )
+  if ( !recording && recContractId )
   {
     // do frontend download
     const provider = await RecordingsContract.getProvider()
@@ -92,6 +92,8 @@ async function initMeet ()
 {
   try
   {
+    store.showOverlay(true)
+    store.setLoaderMessage("Creating Room...")
     const { id, roomTitle: title, roomDescription: description, experianceId, conditionType, conditionValue, contractAddress, expiryTime, startTime,
       ...rest } = await getRoomConfig( experience.value.id )
     const contractAddresses = contractAddress ? [ contractAddress ] : undefined
@@ -103,9 +105,11 @@ async function initMeet ()
       experience.value = exp
       redirectToMeetPage()
     }
+    store.showOverlay(false)
   } catch ( err )
   {
     console.error( err )
+    store.showOverlay(false)
   }
 }
 
@@ -130,7 +134,7 @@ onMounted( async () =>
       <div class="header-content">
         <div class="header-flex">
           <div class="experience-header-flex">
-            <img src="/chat-room.jpg" alt="Experience Image" class="header-image">
+            <img src="/experience.jpg" alt="Experience Image" class="header-image">
             <div class="header-text">
               <h1>{{ experience.expTitle }}</h1>
               <p>{{ experience.expDescription }}</p>
@@ -159,8 +163,8 @@ onMounted( async () =>
                 <span class="rating-count">{{ experience.experianceStats.totalRatings }} Ratings</span>
               </div>
               <div class="participants">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path fill="#00BFA6"
+                <svg class="icon" :style="{marginTop:'12px'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path fill="#181818"
                     d="M12 0c-6.628 0-12 5.372-12 12s5.372 12 12 12 12-5.372 12-12-5.372-12-12-12zm5 14h-10c-.552 0-1-.448-1-1s.448-1 1-1h10c.552 0 1 .448 1 1s-.448 1-1 1z" />
                 </svg>
                 <span class="participants-count">{{ experience.participantsAllowed }} Participants</span>
@@ -213,7 +217,7 @@ onMounted( async () =>
         <div class="hosts-content">
           <div v-for="host in experience.hosts" :key="host.id" class="host">
             <div class="host-info">
-              <img src="/chat-room.jpg" alt="Host Image" class="host-image">
+              <img src="/artitst.jpg" alt="Host Image" class="host-image">
               <p class="host-address"
                 :style="{ color: store.user?.ethAddress === host.ethAddress ? 'hsla(160, 100%, 37%, 1)' : '#6b7280' }">{{
                   host.ethAddress.substring( 0, 10 ) }}...</p>
@@ -247,7 +251,7 @@ onMounted( async () =>
 /* Header Section */
 
 .experience-page {
-  padding: 0 0 5% 0;
+  padding: 3% 0 3% 0;
 }
 
 
@@ -256,9 +260,10 @@ onMounted( async () =>
   align-items: center;
   column-gap: 20px;
   padding: 25px;
-  background-color: var(--color-background-mute);
+  background-color: hsla(160, 100%, 37%, 1);
   border-radius: 20px 20px 0 0px;
   justify-content: space-evenly;
+  color: var(--vt-c-black-mute);
 }
 
 .experience-header-flex {
@@ -266,14 +271,17 @@ onMounted( async () =>
   align-items: center;
   column-gap: 20px;
   padding: 25px;
-  background-color: var(--color-background-mute);
+  background-color: hsla(160, 100%, 37%, 1);
   border-radius: 20px 20px 0 0px;
   justify-content: space-evenly;
+  color: var(--vt-c-black-mute);
 }
 
 .header-image {
   max-width: 230px;
   border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+
 }
 
 .header-text h1 {

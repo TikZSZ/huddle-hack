@@ -59,10 +59,9 @@ export class ExperiencesController
   {
     const recMetadata = await this.prisma.recordingMetadata.findUnique( { where: { experienceId: experienceId } } )
     if ( !recMetadata ) throw new BadRequestException()
-
     const recording = await this.prisma.recording.findUnique( { where: { id: recordId } } )
     if ( !recording ) throw new NotFoundException()
-
+    
     if ( !recMetadata.tokenGatedRecording )
     {
       return { recMetadata, recording }
@@ -105,7 +104,7 @@ export class ExperiencesController
   @UseGuards( AuthGuard )
   async wrapUp ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @Body() data: WrapUpDTO )
   {
-    const exp = await this.prisma.experience.findUnique( { where: { id: experienceId },select:{id:true,experianceStats:{select:{experianceStatus:true}}} } )
+    const exp = await this.prisma.experience.findUnique( { where: { id: experienceId },select:{id:true,experianceStats:{select:{experianceStatus:true}},tokenGatedRecording:true} } )
     if ( !exp ) throw new NotFoundException()
     if(exp.experianceStats!.experianceStatus === "FINISHED") throw new BadRequestException()
     const {saveRecording,recContractId,url,...rest} = data
@@ -117,7 +116,7 @@ export class ExperiencesController
         },
         include: { experianceStats: true, hosts: true }
       } )
-    }else if (url){
+    }else if (url && !exp.tokenGatedRecording){
       return this.prisma.experience.update( {
         where: { id: experienceId }, data: {
           experianceStats: { update: { experianceStatus: "FINISHED" } },

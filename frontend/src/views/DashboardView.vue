@@ -92,58 +92,67 @@ async function deployAndGetContractAdd ()
 
 async function createExperience ()
 {
-  console.log( JSON.parse( JSON.stringify( exp.value ) ) );
-  let createdExp: Experience
-  const startTime = new Date()
-  startTime.setHours( parseInt( exp.value.startTime.split( ":" )[ 0 ] ) )
-  startTime.setMinutes( parseInt( exp.value.startTime.split( ":" )[ 1 ] ) )
-  const expiryTime = new Date()
-  expiryTime.setHours( parseInt( exp.value.expiryTime.split( ":" )[ 0 ] ) )
-  expiryTime.setMinutes( parseInt( exp.value.expiryTime.split( ":" )[ 1 ] ) )
+  try
+  {
+    console.log( JSON.parse( JSON.stringify( exp.value ) ) );
+    store.showOverlay(true)
+    store.setLoaderMessage("Creating Experience")
+    let createdExp: Experience
+    const startTime = new Date()
+    startTime.setHours( parseInt( exp.value.startTime.split( ":" )[ 0 ] ) )
+    startTime.setMinutes( parseInt( exp.value.startTime.split( ":" )[ 1 ] ) )
+    const expiryTime = new Date()
+    expiryTime.setHours( parseInt( exp.value.expiryTime.split( ":" )[ 0 ] ) )
+    expiryTime.setMinutes( parseInt( exp.value.expiryTime.split( ":" )[ 1 ] ) )
 
-  exp.value.startTime = startTime.toISOString()
-  exp.value.expiryTime = expiryTime.toISOString()
-  if ( !exp.value.tokenGatedRoom && !exp.value.tokenGatedRecording )
-  {
-    const { roomConfig: { roomLocked, muteOnEntry, videoOnEntry }, recordingMetadata, ...rest } = exp.value
-    createdExp = await createExpWrapper( {
-      ...rest, roomConfig: {
-        roomLocked, muteOnEntry, videoOnEntry
-      },
-      recordingMetadata: {}
-    } )
-  } else if ( !exp.value.tokenGatedRoom && exp.value.tokenGatedRecording )
-  {
-    // deploy recording contract... -> contract address
-    // add contract address etc and create exp
-    const contractAddress = await deployAndGetContractAdd()
-    const { roomConfig, recordingMetadata, ...rest } = exp.value
-    createdExp = await createExpWrapper( {
-      ...rest, roomConfig,
-      recordingMetadata: { ...recordingMetadata, contractAddress }
-    } )
-  } else if ( exp.value.tokenGatedRoom && !exp.value.tokenGatedRecording )
-  {
-    const { roomConfig, recordingMetadata, ...rest } = exp.value
-    createdExp = await createExpWrapper( {
-      ...rest, roomConfig,
-      recordingMetadata: {}
-    } )
-  } else
-  {
-    const contractAddress = await deployAndGetContractAdd()
-    const { roomConfig, recordingMetadata, ...rest } = exp.value
-    createdExp = await createExpWrapper( {
-      ...rest, roomConfig,
-      recordingMetadata: { ...recordingMetadata, contractAddress }
-    } )
+    exp.value.startTime = startTime.toISOString()
+    exp.value.expiryTime = expiryTime.toISOString()
+    if ( !exp.value.tokenGatedRoom && !exp.value.tokenGatedRecording )
+    {
+      const { roomConfig: { roomLocked, muteOnEntry, videoOnEntry }, recordingMetadata, ...rest } = exp.value
+      createdExp = await createExpWrapper( {
+        ...rest, roomConfig: {
+          roomLocked, muteOnEntry, videoOnEntry
+        },
+        recordingMetadata: {}
+      } )
+    } else if ( !exp.value.tokenGatedRoom && exp.value.tokenGatedRecording )
+    {
+      // deploy recording contract... -> contract address
+      // add contract address etc and create exp
+      store.setLoaderMessage("Deploying REC20 Contract...")
+      const contractAddress = await deployAndGetContractAdd()
+      const { roomConfig, recordingMetadata, ...rest } = exp.value
+      createdExp = await createExpWrapper( {
+        ...rest, roomConfig,
+        recordingMetadata: { ...recordingMetadata, contractAddress }
+      } )
+    } else if ( exp.value.tokenGatedRoom && !exp.value.tokenGatedRecording )
+    {
+      const { roomConfig, recordingMetadata, ...rest } = exp.value
+      createdExp = await createExpWrapper( {
+        ...rest, roomConfig,
+        recordingMetadata: {}
+      } )
+    } else
+    {
+      store.setLoaderMessage("Deploying REC20 Contract...")
+      const contractAddress = await deployAndGetContractAdd()
+      const { roomConfig, recordingMetadata, ...rest } = exp.value
+      createdExp = await createExpWrapper( {
+        ...rest, roomConfig,
+        recordingMetadata: { ...recordingMetadata, contractAddress }
+      } )
+    }
+    console.log( createdExp );
+    router.push( { name: "ExperienceDetails", params: { id: createdExp.id } } )
+    store.showOverlay(false)
   }
-  console.log( createdExp );
-  router.push( { name: "ExperienceDetails", params: { id: createdExp.id } } )
+  catch ( err )
+  {
+    store.showOverlay(false)
+  }
 }
-
-
-
 </script>
 
 <template>
