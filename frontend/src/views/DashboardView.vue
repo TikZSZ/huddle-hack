@@ -1,21 +1,23 @@
 <script lang="ts" setup>
 import useStore from '@/stores/store';
-import { type Experience, Chain, TokenType, type IRoomCreation } from '@/utils/types';
+import { type Experience, Chain, TokenType, type IRoomCreation, type ICreateExperience } from '@/utils/types';
 import { ref, type Ref, computed } from 'vue';
-import {} from "@/utils/api"
-
+import { createExperience as createExperienceAPI } from "@/utils/api"
+import { useRouter } from 'vue-router';
+import RecordingsContract from '@/contract/RecordingsContract';
+const router = useRouter()
 const store = useStore()
-const userAddress = store.user!.ethAddress 
+const userAddress = store.user!.ethAddress
 
 const exp: Ref<IRoomCreation> = ref( {
   "expTitle": "New World",
   "expDescription": "Catch on new Events happening accross fields, like AI,ML and WEB3",
   "tokenGatedRoom": false,
-  "startTime": (new Date()).toISOString(),
-  "expiryTime": (new Date()).toISOString(),
+  "startTime": ( new Date() ).toISOString(),
+  "expiryTime": ( new Date() ).toISOString(),
   participantsAllowed: 50,
   hosts: [
-  userAddress
+    userAddress
   ],
   "tokenGatedRecording": false,
   "recordingMetadata": {
@@ -30,6 +32,11 @@ const exp: Ref<IRoomCreation> = ref( {
     "chain": "ETHEREUM",
     "contractAddress": "0x............"
   }
+} )
+
+const recordMetaMisc: Ref<{ tokenName: string, tokenSymbol: string }> = ref( {
+  tokenName: "RecToken",
+  tokenSymbol: "REC"
 } )
 
 const hosts = computed( {
@@ -69,10 +76,70 @@ function getEnumValues<T> ( enumType: T ): Array<string>
   ] as any
 }
 
+async function createExpWrapper ( data: ICreateExperience )
+{
+  const createdExp = await createExperienceAPI( data )
+  return createdExp
+}
+
+async function deployAndGetContractAdd ()
+{
+  const provider = await RecordingsContract.getProvider()
+  const recContract = new RecordingsContract( { name: recordMetaMisc.value.tokenName, symbol: recordMetaMisc.value.tokenSymbol }, provider )
+  const contractAddress = await recContract.deploy()
+  return contractAddress
+}
+
 async function createExperience ()
 {
   console.log( JSON.parse( JSON.stringify( exp.value ) ) );
-  createExperience()
+  let createdExp: Experience
+  const startTime = new Date()
+  startTime.setHours( parseInt( exp.value.startTime.split( ":" )[ 0 ] ) )
+  startTime.setMinutes( parseInt( exp.value.startTime.split( ":" )[ 1 ] ) )
+  const expiryTime = new Date()
+  expiryTime.setHours( parseInt( exp.value.expiryTime.split( ":" )[ 0 ] ) )
+  expiryTime.setMinutes( parseInt( exp.value.expiryTime.split( ":" )[ 1 ] ) )
+
+  exp.value.startTime = startTime.toISOString()
+  exp.value.expiryTime = expiryTime.toISOString()
+  if ( !exp.value.tokenGatedRoom && !exp.value.tokenGatedRecording )
+  {
+    const { roomConfig: { roomLocked, muteOnEntry, videoOnEntry }, recordingMetadata, ...rest } = exp.value
+    createdExp = await createExpWrapper( {
+      ...rest, roomConfig: {
+        roomLocked, muteOnEntry, videoOnEntry
+      },
+      recordingMetadata: {}
+    } )
+  } else if ( !exp.value.tokenGatedRoom && exp.value.tokenGatedRecording )
+  {
+    // deploy recording contract... -> contract address
+    // add contract address etc and create exp
+    const contractAddress = await deployAndGetContractAdd()
+    const { roomConfig, recordingMetadata, ...rest } = exp.value
+    createdExp = await createExpWrapper( {
+      ...rest, roomConfig,
+      recordingMetadata: { ...recordingMetadata, contractAddress }
+    } )
+  } else if ( exp.value.tokenGatedRoom && !exp.value.tokenGatedRecording )
+  {
+    const { roomConfig, recordingMetadata, ...rest } = exp.value
+    createdExp = await createExpWrapper( {
+      ...rest, roomConfig,
+      recordingMetadata: {}
+    } )
+  } else
+  {
+    const contractAddress = await deployAndGetContractAdd()
+    const { roomConfig, recordingMetadata, ...rest } = exp.value
+    createdExp = await createExpWrapper( {
+      ...rest, roomConfig,
+      recordingMetadata: { ...recordingMetadata, contractAddress }
+    } )
+  }
+  console.log( createdExp );
+  router.push( { name: "ExperienceDetails", params: { id: createdExp.id } } )
 }
 
 
@@ -103,34 +170,34 @@ async function createExperience ()
       </div>
 
       <label>Start Time:</label>
-      <input type="datetime-local" v-model="exp.startTime"><br>
+      <input type="time" v-model="exp.startTime" step="60"><br>
 
       <label>Expiry Time:</label>
-      <input type="datetime-local" v-model="exp.expiryTime"><br>
+      <input type="time" v-model="exp.expiryTime" step="60"><br>
 
       <div class="checkbox-label">
-          <label>Room Locked:</label>
-          <div class="checkbox-container">
-            <input id="room-locked" type="checkbox" v-model="exp.roomConfig.roomLocked">
-            <label for="room-locked" class="checkbox-icon"></label>
-          </div>
+        <label>Room Locked:</label>
+        <div class="checkbox-container">
+          <input id="room-locked" type="checkbox" v-model="exp.roomConfig.roomLocked">
+          <label for="room-locked" class="checkbox-icon"></label>
         </div>
+      </div>
 
-        <div class="checkbox-label">
-          <label>Mute on Entry:</label>
-          <div class="checkbox-container">
-            <input id="mute-entry" type="checkbox" v-model="exp.roomConfig.muteOnEntry">
-            <label for="mute-entry" class="checkbox-icon"></label>
-          </div>
+      <div class="checkbox-label">
+        <label>Mute on Entry:</label>
+        <div class="checkbox-container">
+          <input id="mute-entry" type="checkbox" v-model="exp.roomConfig.muteOnEntry">
+          <label for="mute-entry" class="checkbox-icon"></label>
         </div>
+      </div>
 
-        <div class="checkbox-label">
-          <label>Video on Entry:</label>
-          <div class="checkbox-container">
-            <input id="video-entry" type="checkbox" v-model="exp.roomConfig.videoOnEntry">
-            <label for="video-entry" class="checkbox-icon"></label>
-          </div>
+      <div class="checkbox-label">
+        <label>Video on Entry:</label>
+        <div class="checkbox-container">
+          <input id="video-entry" type="checkbox" v-model="exp.roomConfig.videoOnEntry">
+          <label for="video-entry" class="checkbox-icon"></label>
         </div>
+      </div>
 
       <div class="checkbox-label">
         <label>Token Gated Recording:</label>
@@ -143,6 +210,11 @@ async function createExperience ()
       <template v-if="exp.tokenGatedRecording">
         <label>Recording Metadata:</label>
         <fieldset>
+          <label>Token Name:</label>
+          <input type="text" v-model="recordMetaMisc.tokenName">
+          <label>Token Symbol:</label>
+          <input type="text" v-model="recordMetaMisc.tokenSymbol">
+
           <label class="radio-label" data-v-336c5134="">Token Type:</label>
           <div class="radio-group">
             <label class="radio-option">
@@ -170,29 +242,27 @@ async function createExperience ()
       </div>
 
 
-      <label>Room Configuration:</label>
-      <fieldset>
-        <template v-if="exp.tokenGatedRoom">
-          <label class="radio-label">Token Type:</label>
-          <div class="radio-group">
-            <template v-for="tokenType in getEnumValues( TokenType )">
-              <label class="radio-option">
-                <input class="radio-input" type="radio" v-model="exp.roomConfig.tokenType" name="roomConfig-token-type"
-                  :value="tokenType">
-                <span class="radio-button"></span>
-                {{ tokenType }}
-              </label>
-            </template>
-          </div>
+      <fieldset v-if="exp.tokenGatedRoom">
+        <label>Room Configuration:</label>
+        <label class="radio-label">Token Type:</label>
+        <div class="radio-group">
+          <template v-for="tokenType in getEnumValues( TokenType )">
+            <label class="radio-option">
+              <input class="radio-input" type="radio" v-model="exp.roomConfig.tokenType" name="roomConfig-token-type"
+                :value="tokenType">
+              <span class="radio-button"></span>
+              {{ tokenType }}
+            </label>
+          </template>
+        </div>
 
-          <label>Chain:</label>
-          <select v-model="exp.roomConfig.chain">
-            <option :value="chain" v-for="chain in getEnumValues( Chain )">{{ chain }}</option>
-          </select>
+        <label>Chain:</label>
+        <select v-model="exp.roomConfig.chain">
+          <option :value="chain" v-for="chain in getEnumValues( Chain )">{{ chain }}</option>
+        </select>
 
-          <label>Contract Address:</label>
-          <input type="text" v-model="exp.roomConfig.contractAddress">
-        </template>
+        <label>Contract Address:</label>
+        <input type="text" v-model="exp.roomConfig.contractAddress">
       </fieldset>
 
       <button type="submit">Save</button>
@@ -346,7 +416,7 @@ label {
 /* Input styles */
 input[type="text"],
 input[type="number"],
-input[type="datetime-local"] {
+input[type="time"] {
   width: 100%;
   padding: 10px;
   margin-bottom: 20px;

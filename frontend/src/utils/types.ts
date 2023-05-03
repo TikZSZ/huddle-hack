@@ -47,20 +47,17 @@ export interface Experience {
   ownerId: number;
   experianceStats: ExperianceStats;
   hosts: Host[];
-  // recordingMetadata: RecordingMetadata;
-  // roomConfig: RoomConfig;
-  // owner: Host;
 }
 
 export interface ICreateExperience
 {
   expTitle: string;
   expDescription?: string;
-  participantsAllowed?: number;
+  participantsAllowed: number;
   tokenGatedRoom: boolean;
   tokenGatedRecording: boolean;
   startTime:string;
-  endTime:string;
+  expiryTime:string;
   hosts: string[];
   recordingMetadata: {
     chain?: string;
@@ -81,16 +78,16 @@ export interface ICreateExperience
 
 export interface IRoomCreation
 {
-  tokenGatedRecording: boolean;
-  recordingMetadata: RecordingMetadatad;
-  roomConfig: RoomConfigd;
   expTitle: string;
+  expDescription?: string;
+  participantsAllowed: number;
   tokenGatedRoom: boolean;
-  expDescription: string;
+  tokenGatedRecording: boolean;
   startTime: string;
   expiryTime: string;
-  participantsAllowed: number;
   hosts: string[]
+  recordingMetadata: RecordingMetadatad;
+  roomConfig: RoomConfigd;
 }
 
 interface RoomConfigd

@@ -76,8 +76,9 @@ async function downloadRecording ( recId: number )
 
 function redirectToMeetPage ()
 {
-  if ( !experience.value.roomId || !joinRoomRef.value ) {
-    console.log("cannot redirect");
+  if ( !experience.value.roomId || !joinRoomRef.value )
+  {
+    console.log( "cannot redirect" );
     return
   }
   joinRoomRef.value.target = "_blank"
@@ -89,9 +90,9 @@ async function initMeet ()
 {
   try
   {
-    const { id, roomTitle: title, roomDescription: description, experianceId, conditionType, conditionValue, contractAddress,expiryTime,startTime,
+    const { id, roomTitle: title, roomDescription: description, experianceId, conditionType, conditionValue, contractAddress, expiryTime, startTime,
       ...rest } = await getRoomConfig( experience.value.id )
-    const contractAddresses = contractAddress ? [contractAddress] :  undefined
+    const contractAddresses = contractAddress ? [ contractAddress ] : undefined
     const hostWallets = experience.value.hosts.map( ( host ) => host.ethAddress )
     const createdRoom = await createIFrameRoom( { title, description, hostWallets, contractAddress: contractAddresses, ...rest } )
     if ( createdRoom.data.roomId )
@@ -110,7 +111,7 @@ async function wrapUp ()
 {
   try
   {
-    const exp = await wrapUpAPI(experience.value.id)
+    const exp = await wrapUpAPI( experience.value.id )
     experience.value = exp
   } catch ( err )
   {
@@ -215,7 +216,7 @@ onMounted( async () =>
       <section class="hosts">
         <h2>Hosts</h2>
         <div class="hosts-content">
-          <div v-for="host in [ ...experience.hosts, experience.hosts[ 0 ] ]" :key="host.id" class="host">
+          <div v-for="host in experience.hosts" :key="host.id" class="host">
             <div class="host-info">
               <img src="/chat-room.jpg" alt="Host Image" class="host-image">
               <p class="host-address"
@@ -242,25 +243,6 @@ onMounted( async () =>
           <!-- Add more recording cards here -->
         </div>
         <a href="" target="__blank" ref="downloadAnchorTag" hidden></a>
-      </section>
-
-      <section class="feedback">
-        <h2>Feedback</h2>
-        <form>
-          <label>
-            <span>Rating:</span>
-            <!-- v-model="rating" -->
-            <select>
-              <option value="5">5</option>
-              <option value="4">4</option>
-              <option value="3">3</option>
-              <option value="2">2</option>
-              <option value="1">1</option>
-            </select>
-          </label>
-          <!-- @click.prevent="submitFeedback" -->
-          <button type="submit">Submit</button>
-        </form>
       </section>
     </div>
   </div>

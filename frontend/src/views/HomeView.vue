@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { RecordingsContract } from "@/contract/RecordingsContract"
-import { BrowserProvider } from "ethers";
-
 
 // const provider = await RecordingsContract.getProvider()
 

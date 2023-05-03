@@ -123,7 +123,7 @@ export class ExperiencesController
         nonce: string
       }
     }[] = []
-    
+
     {
       hosts.map( ( hostAddress ) =>
       {
