@@ -61,7 +61,7 @@ async function downloadRecording ( recId: number )
   //"https://i.ibb.co/N9byH6K/52437634tg.jpg"
   console.log( recId );
   const { recMetadata, recording, recContractId } = await getRecording( experience.value.id, recId )
-  if ( recMetadata.tokenGatedRecording === true && recMetadata.tokenType === "REC20" )
+  if (  recording && !recording.url && recContractId )
   {
     // do frontend download
     const provider = await RecordingsContract.getProvider()
@@ -71,7 +71,7 @@ async function downloadRecording ( recId: number )
     triggerDownload( recURL )
   } else
   {
-    if ( recording )
+    if ( recording && recording.url )
       triggerDownload( recording.url )
   }
 }

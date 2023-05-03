@@ -3,8 +3,9 @@ import { GetJwtToken } from 'src/global/decorators/param.decorator';
 import { AuthGuard } from 'src/global/guards/auth.guard';
 import { JwtToken } from 'src/global/types/JwtToken';
 import { PrismaService } from 'src/prisma.service';
-import { InitMeetDTO, ExperienceDTO } from './experience';
+import { InitMeetDTO, ExperienceDTO, WrapUpDTO, } from './experience';
 import { ExperianceStatus } from 'src/global/models/enums';
+
 
 @Controller( 'experiences' )
 export class ExperiencesController
@@ -26,17 +27,25 @@ export class ExperiencesController
   @Get( "/:experienceId/roomConfig" )
   async getRoomConfig ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
   {
-    const exp = await this.prisma.experience.findFirst( { where: { id: experienceId }, select: { recordingMetadata: true, roomConfig: true, tokenGatedRoom: true } } )
+    const exp = await this.prisma.experience.findFirst( { where: { id: experienceId }, select: { roomConfig: true, tokenGatedRoom: true } } )
     if ( !exp ) throw new NotFoundException()
     if ( !exp.roomConfig ) throw new NotFoundException()
-    const { recordingMetadata, roomConfig, ...rest } = exp
+    const { roomConfig, ...rest } = exp
 
     if ( !rest.tokenGatedRoom )
     {
-      const { chain, conditionType, conditionValue,tokenType, contractAddress, ...newRoomConfig } = roomConfig
+      const { chain, conditionType, conditionValue, tokenType, contractAddress, ...newRoomConfig } = roomConfig
       return newRoomConfig
     }
     return roomConfig
+  }
+
+  @Get( "/:experienceId/expRecMetadata" )
+  async getExpRecMetadata ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number )
+  {
+    const recM = await this.prisma.recordingMetadata.findUnique( { where: { experienceId } } )
+    if ( !recM ) throw new NotFoundException()
+    return recM
   }
 
   @Get( "/:experienceId/recordings" )
@@ -94,16 +103,55 @@ export class ExperiencesController
 
   @Patch( "/:experienceId/wrapUp" )
   @UseGuards( AuthGuard )
-  async wrapUp ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @GetJwtToken() jwtToken: JwtToken )
+  async wrapUp ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @Body() data: WrapUpDTO )
   {
-    const exp = await this.prisma.experience.findUnique( { where: { id: experienceId } } )
+    const exp = await this.prisma.experience.findUnique( { where: { id: experienceId },select:{id:true,experianceStats:{select:{experianceStatus:true}}} } )
     if ( !exp ) throw new NotFoundException()
-    return this.prisma.experience.update( {
-      where: { id: experienceId }, data: {
-        experianceStats: { update: { experianceStatus: "FINISHED" } },
-      },
-      include: { experianceStats: true, hosts: true }
-    } )
+    if(exp.experianceStats!.experianceStatus === "FINISHED") throw new BadRequestException()
+    const {saveRecording,recContractId,url,...rest} = data
+    if ( !saveRecording )
+    {
+      return this.prisma.experience.update( {
+        where: { id: experienceId }, data: {
+          experianceStats: { update: { experianceStatus: "FINISHED" } },
+        },
+        include: { experianceStats: true, hosts: true }
+      } )
+    }else if (url){
+      return this.prisma.experience.update( {
+        where: { id: experienceId }, data: {
+          experianceStats: { update: { experianceStatus: "FINISHED" } },
+          recordings:{
+            create:{
+              ...rest,url,
+              dateRecorded: (new Date()).toISOString()
+            }
+          }
+        },
+        include: { experianceStats: true, hosts: true }
+      } )
+    }else {
+      return this.prisma.experience.update( {
+        where: { id: experienceId }, data: {
+          experianceStats: { update: { experianceStatus: "FINISHED" } },
+          recordings:{
+            create:{
+              ...rest,recContractId,
+              dateRecorded: (new Date()).toISOString()
+            }
+          }
+        },
+        include: { experianceStats: true, hosts: true }
+      } )
+    }
+
+
+    // recordings:{create:{
+    //   dateRecorded: new Date(),
+    //   recDescription:"dasdad",
+    //   recTitle:"adad",
+    //   url:"string"
+    // }}
   }
 
   @Post( "" )

@@ -111,3 +111,36 @@ export class ExperienceDTO
   @Type( () => RecordingMetadata )
   recordingMetadata: RecordingMetadata;
 }
+
+interface WrapUpData
+{
+  saveRecording: boolean
+  recTitle: string
+  url?: string;
+  recDescription: string;
+  recContractId?:number
+}
+
+export class WrapUpDTO {
+
+  @IsDefined()
+  @IsBoolean()
+  saveRecording:true
+
+
+  @IsOptional()
+  @IsString()
+  recTitle:string
+
+  @IsOptional()
+  @IsString()
+  url?:string
+
+  @IsOptional()
+  @IsInt()
+  recContractId?:number
+
+  @IsOptional()
+  @IsString()
+  recDescription:string
+}

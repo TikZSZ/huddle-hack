@@ -141,11 +141,12 @@ export interface RoomConfig {
   experianceId: number;
 }
 
-interface RecordingMetadata {
+export interface RecordingMetadata {
   id: number;
-  chain: any|null;
-  tokenType: any|null;
-  contractAddress: any|null;
+  chain: string|null;
+  tokenType: string|null;
+  contractAddress: string|null;
+  tokenGatedRecording:boolean
   experianceId: number;
 }
 

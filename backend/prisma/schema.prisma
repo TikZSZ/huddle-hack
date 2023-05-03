@@ -87,7 +87,6 @@ model Recording {
   Experience     Experience @relation(fields: [experienceId], references: [id])
   experienceId   Int
   recContractId  Int?
-  private Boolean @default(false)
 }
 
 model ExperianceStats {

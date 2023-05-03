@@ -1,5 +1,5 @@
 import axios from "axios"
-import type { CreateIFrameRoom, CreateTokenGatedIFrameRoom, Experience, Experiences, ICreateExperience, RecordingResponse, Recordings, RoomConfig, User } from "./types"
+import type { CreateIFrameRoom, CreateTokenGatedIFrameRoom, Experience, Experiences, ICreateExperience, RecordingMetadata, RecordingResponse, Recordings, RoomConfig, User } from "./types"
 
 const baseURL = "http://localhost:5000"
 const api = axios.create( {
@@ -56,16 +56,32 @@ export async function getRoomConfig ( expId: number )
   return data
 }
 
+export async function getExpRecMetadata ( expId: number )
+{
+  const { data } = await api.get<RecordingMetadata>( `/experiences/${expId}/expRecMetadata` )
+  return data
+}
+
+
 export async function initMeet ( expId: number, roomId: string )
 {
   const { data } = await api.patch<Experience>( `/experiences/${expId}/initMeet`, { roomId } )
   return data
 }
 
-export async function wrapUp ( expId: number )
+export interface WrapUpData
 {
-  const { data } = await api.patch<Experience>( `/experiences/${expId}/wrapUp` )
-  return data
+  saveRecording: boolean
+  recTitle?: string
+  url?: string;
+  recDescription?: string;
+  recContractId?:number
+}
+
+export async function wrapUp ( expId: number,data: WrapUpData)
+{
+  const { data:resp } = await api.patch<Experience>( `/experiences/${expId}/wrapUp`,data )
+  return resp
 }
 
 
