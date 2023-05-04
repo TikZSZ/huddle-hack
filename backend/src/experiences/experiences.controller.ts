@@ -110,7 +110,7 @@ export class ExperiencesController
       }
       https.get( url, ( response ) =>
       {
-        const fileStream = fs.createWriteStream( filePath, { flags: 'wx' } );
+        const fileStream = fs.createWriteStream( filePath, { flags: 'w' } );
         response.pipe( fileStream );
 
         response.on( 'error', ( error ) =>

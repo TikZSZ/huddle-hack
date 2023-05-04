@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getExperience, getRecording, getRecordings, getRoomConfig, wrapUp as wrapUpAPI, initMeet as initMeetAPI, createIFrameRoom,getCar } from '@/utils/api';
+import { getExperience, getRecording, getRecordings, getRoomConfig, wrapUp as wrapUpAPI, initMeet as initMeetAPI, createIFrameRoom, getCar } from '@/utils/api';
 import type { Experience, RecordingResponse, Recordings } from '@/utils/types';
 import { onMounted, ref, type Ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -56,6 +56,16 @@ function triggerDownload ( url: string )
   downloadAnchorTag.value.click()
 }
 
+async function getURLFromContract ( recId: number )
+{
+  const { recMetadata, recording, recContractId } = await getRecording( experience.value.id, recId )
+  const provider = await RecordingsContract.getProvider()
+  const recordingContract = new RecordingsContract( { contractAddress: recMetadata.contractAddress }, provider )
+  const recURL = await recordingContract.getRecording( recContractId )
+  if ( !recURL ) throw new Error( `couldn't download a recording from ${recMetadata.contractAddress} for id ${recContractId}` )
+  return recURL
+}
+
 async function downloadRecording ( recId: number )
 {
   //"https://i.ibb.co/N9byH6K/52437634tg.jpg"
@@ -64,19 +74,19 @@ async function downloadRecording ( recId: number )
   if ( !recording && recContractId )
   {
     // do frontend download
-    const provider = await RecordingsContract.getProvider()
-    const recordingContract = new RecordingsContract( { contractAddress: recMetadata.contractAddress }, provider )
-    const recURL = await recordingContract.getRecording( recContractId )
-    if ( !recURL ) throw new Error( `couldn't download a recording from ${recMetadata.contractAddress} for id ${recContractId}` )
-    //triggerDownload( recURL )
-    const car = await getCar(experience.value.id,recId,{url:recURL})
-    console.log(car);
-    
+    const recURL = await getURLFromContract(recId)
+    triggerDownload( recURL )
   } else
   {
     if ( recording && recording.url )
       triggerDownload( recording.url )
   }
+}
+
+async function saveToFileCoin ( recId: number )
+{
+  const recURL = await getURLFromContract(recId)
+  router.push( { name: "MakeDeal", params: { expId: experience.value.id, recId }, query: { url:recURL} } )
 }
 
 function redirectToMeetPage ()
@@ -95,8 +105,8 @@ async function initMeet ()
 {
   try
   {
-    store.showOverlay(true)
-    store.setLoaderMessage("Creating Room...")
+    store.showOverlay( true )
+    store.setLoaderMessage( "Creating Room..." )
     const { id, roomTitle: title, roomDescription: description, experianceId, conditionType, conditionValue, contractAddress, expiryTime, startTime,
       ...rest } = await getRoomConfig( experience.value.id )
     const contractAddresses = contractAddress ? [ contractAddress ] : undefined
@@ -108,11 +118,11 @@ async function initMeet ()
       experience.value = exp
       redirectToMeetPage()
     }
-    store.showOverlay(false)
+    store.showOverlay( false )
   } catch ( err )
   {
     console.error( err )
-    store.showOverlay(false)
+    store.showOverlay( false )
   }
 }
 
@@ -166,7 +176,7 @@ onMounted( async () =>
                 <span class="rating-count">{{ experience.experianceStats.totalRatings }} Ratings</span>
               </div>
               <div class="participants">
-                <svg class="icon" :style="{marginTop:'12px'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <svg class="icon" :style="{ marginTop: '12px' }" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <path fill="#181818"
                     d="M12 0c-6.628 0-12 5.372-12 12s5.372 12 12 12 12-5.372 12-12-5.372-12-12-12zm5 14h-10c-.552 0-1-.448-1-1s.448-1 1-1h10c.552 0 1 .448 1 1s-.448 1-1 1z" />
                 </svg>
@@ -240,6 +250,9 @@ onMounted( async () =>
             </div>
             <div class="recording-actions">
               <button class="download-btn" @click="downloadRecording( recording.id )">Download</button>
+            </div>
+            <div v-if="experience.tokenGatedRecording" class="recording-actions">
+              <button class="download-btn" @click="saveToFileCoin( recording.id )">Save to FileCoin</button>
             </div>
           </div>
           <!-- Add more recording cards here -->
@@ -564,6 +577,7 @@ button {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
+  margin: 0 10px;
 }
 
 .download-btn:hover {

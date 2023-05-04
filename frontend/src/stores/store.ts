@@ -65,5 +65,7 @@ export default defineStore( 'counter', () =>
     loaderMessage.value = val
   }
 
-  return { count, doubleCount, increment, isLoggedIn, user, loginUser, sVerifyUser, walletConnected, updateWalletConnectionStatus, MetaMaskExists, updateMetaMaskExists,isLoading,loaderMessage,showOverlay,setLoaderMessage }
+  const currentRoute = ref("")
+
+  return { count, doubleCount, increment, isLoggedIn, user, loginUser, sVerifyUser, walletConnected, updateWalletConnectionStatus, MetaMaskExists, updateMetaMaskExists,isLoading,loaderMessage,showOverlay,setLoaderMessage,currentRoute }
 } )

@@ -33,9 +33,9 @@ const router = createRouter( {
       component: WrapUpViewVue,
     },
     {
-      path:"/makeDeal",
-      name:"MakeDeal",
-      component:MakeDealViewVue
+      path: "/experience/:expId/recordings/:recId/makeDeal",
+      name: "MakeDeal",
+      component: MakeDealViewVue
     },
     {
       path: '/dashboard',
@@ -62,20 +62,28 @@ const router = createRouter( {
 router.beforeEach( async ( to, from, next ) =>
 {
   const store = useStore()
-  if ( to.matched.every( ( match ) => match.meta.requiresAuth )){
-    try {
+  if ( to.matched.every( ( match ) => match.meta.requiresAuth ) )
+  {
+    try
+    {
       await store.sVerifyUser()
-    }catch(err){
-      next({path:'/'})
+    } catch ( err )
+    {
+      store.currentRoute = "/"
+      next( { path: '/' } )
       return
     }
-    if(store.isLoggedIn()) {
+    if ( store.isLoggedIn() )
+    {
+      store.currentRoute = to.path
       next()
       return
     }
-    next({path:'/'})
+    store.currentRoute = "/"
+    next( { path: '/' } )
     return
   }
+  store.currentRoute = to.path
   next()
   return
 } )

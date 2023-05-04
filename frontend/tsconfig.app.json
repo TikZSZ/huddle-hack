@@ -1,6 +1,6 @@
 {
   "extends": "@vue/tsconfig/tsconfig.web.json",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue","src/contract/Recordings.json","src/contract/DealClient.json"],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue","src/contract/Recordings.json","src/contract/DealClient.json","src/contract/REC20.json"],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
     "composite": true,

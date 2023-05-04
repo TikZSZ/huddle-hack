@@ -48,9 +48,11 @@ async function handleMetamaskLogin ()
   }
 }
 
+
 onMounted( async () =>
 {
   await store.sVerifyUser()
+  console.log(store.currentRoute);
   if ( window.ethereum )
   {
     store.updateMetaMaskExists( true )
@@ -70,9 +72,13 @@ onMounted( async () =>
       <nav class="navbar">
         <a class="navbar-brand" href="#">HuddleCast</a>
         <div class="navbar-menu">
-          <RouterLink to="/">Home</RouterLink>
-          <RouterLink to="/discover">Discover</RouterLink>
-          <RouterLink v-if="store.isLoggedIn()" to="/dashboard">Dashboard</RouterLink>
+          <RouterLink to="/" :style="store.currentRoute === '/' ? {color:'hsla(160, 100%, 37%, 1)'} : {}">Home</RouterLink>
+          <RouterLink to="/discover" 
+          :style="store.currentRoute === '/discover' ? {color:'hsla(160, 100%, 37%, 1)'} : {}"
+          >Discover</RouterLink>
+          <RouterLink v-if="store.isLoggedIn()" to="/dashboard"
+          :style="store.currentRoute === '/dashboard' ? {color:'hsla(160, 100%, 37%, 1)'} : {}"
+          >Dashboard</RouterLink>
         </div>
         <div class="navbar-account">
           <div v-if="store.isLoggedIn()" style="display: flex;">
@@ -169,7 +175,6 @@ header {
 .navbar-brand {
   font-weight: bold;
   font-size: 24px;
-  text-transform: uppercase;
 }
 
 .navbar-menu {
@@ -184,6 +189,16 @@ header {
   padding: 5px 10px;
   font-size: 1.5rem;
 }
+
+.current {
+  color: var(--vt-c-white);
+  text-decoration: none;
+  margin-left: 20px;
+  padding: 5px 10px;
+  font-size: 1.5rem;
+  color: hsla(160, 100%, 37%, 1);
+}
+
 
 .navbar-menu a:hover {
   background-color: var(--vt-c-black-soft);
