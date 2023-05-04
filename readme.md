@@ -14,21 +14,14 @@ HuddleCast is a communication platform that provides a secure and exclusive way 
 - [Experience Creation Flow]
 
 
-<br/>
-
 ## HuddleCast Structure
 - App frontend -> `frontend` dir
 - App backend -> `backend` dir
 - Smart contract source code -> `frontend/src/contract`
 
-<br/>
-
 # Contract Addresses (All deployed on Filecoin Hyperspace)
 - Token Gated Contract  `https://hyperspace.filfox.info/en/address/0x9803c3c49d56E66A9e5CA8dAf8b8b118909F37bd`
 - FileCoin DealClient Contract `https://hyperspace.filfox.info/en/address/0x464B560CEBEa46F409A2C0dD39219Aa65a0F22Be`
-
-
-<br/>
 
 ## Steps to start frontend
 
@@ -57,8 +50,6 @@ docker run --name mydb -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres
 
 > ### Some enviorment vars are need to be set in `.env` file. For reference `.env.example` file is give.
 
-<br/>
-
 # Usage
 
 1. start `backend`
@@ -75,25 +66,26 @@ docker run --name mydb -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres
    - provide `recording URL`
    - recording URL is saved in `Smart Contract`
 
-
-<br/>
-<br/>
-
 # Technologies Used
 
 ### `Huddle01` -> Huddle01 is a core component of the HuddleCast platform, providing the necessary infrastructure for creating and hosting recurring events. The platform is built around meetings, and Huddle01 takes care of the room creation, we create experiences that hold the room configuration for Huddle's sdk, like room name, room description, timings, if the meet is suppoesd to be token gated then we store the token and contract information as well. With Huddle01's SDK, the process of initializing a token-gated room is seamless, allowing for hassle-free setup of recurring sessions.
 
+<br/>
+
 ### `FVM` -> The use of FVM in HuddleCast is two-fold. 
+1. Firstly, we use it to token-gate recordings of events. By deploying a REC20 smart contract, which is essentially an ERC20 contract with added functionality to store recording URLs, access to these recordings is restricted only to those who hold the corresponding token. This provides a high level of security and privacy for users, ensuring that recorded content is only accessible to authorized individuals.
 
-<br/>
+2. Secondly, we utilize FVM and the MakeDeal contract to store recordings on the Filecoin network by proposing store deals. 
+- First we receive the recording URL from the backend/contract depends on tokenGate flag, 
+- Then we send it to the HuddleCast backend to upload the Carfile of recording on IPFS using the `Lighthouse SDK`. 
+- The backend sends back the car info to the frontend, 
+- The frontend then uses this information to create a makeDealProposal on the Filecoin network, which stores the recording securely and ensures data decentralization. 
 
-### 1. Firstly, we use it to token-gate recordings of events. By deploying a REC20 smart contract, which is essentially an ERC20 contract with added functionality to store recording URLs, access to these recordings is restricted only to those who hold the corresponding token. This provides a high level of security and privacy for users, ensuring that recorded content is only accessible to authorized individuals.
+Using FVM to store recordings on Filecoin offers several benefits for HuddleCast. 
+- Firstly, it ensures data security and decentralization, making it easy to move and replicate data while ensuring maximum ownership through decentralization. 
+- Secondly, it enables the platform to scale easily as Filecoin's storage capacity can be increased over time as more storage is needed `(Huddle stores recording only for 15 days so really good to have feature)`. 
+- Finally, it provides an added layer of security and privacy, which is essential for a platform that caters to business and educational needs.
 
-<br/>
-
-### 2. Secondly, we utilize FVM and the MakeDeal contract to store recordings on the Filecoin network by proposing store deals. Once we receive the recording URL from the frontend, we send it to the HuddleCast backend to upload its Car file on IPFS using the `Lighthouse SDK`. The backend sends back the car info to the frontend, The frontend then uses this information to create a makeDealProposal on the Filecoin network, which stores the recording securely and ensures data decentralization. Using FVM to store recordings on Filecoin offers several benefits for HuddleCast. Firstly, it ensures data security and decentralization, making it easy to move and replicate data while ensuring maximum ownership through decentralization. Secondly, it enables the platform to scale easily as Filecoin's storage capacity can be increased over time as more storage is needed `(Huddle stores recording only for 15 days so really good to have feature)`. Finally, it provides an added layer of security and privacy, which is essential for a platform that caters to business and educational needs.
-
-<br/>
 <br/>
 
 # Experience Creation Flow
