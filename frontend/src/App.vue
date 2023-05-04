@@ -68,7 +68,7 @@ onMounted( async () =>
   <div class="app">
     <header>
       <nav class="navbar">
-        <a class="navbar-brand" href="#">My Site</a>
+        <a class="navbar-brand" href="#">HuddleCast</a>
         <div class="navbar-menu">
           <RouterLink to="/">Home</RouterLink>
           <RouterLink to="/discover">Discover</RouterLink>

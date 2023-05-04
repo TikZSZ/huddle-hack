@@ -5,7 +5,8 @@ import DashboardViewVue from '@/views/DashboardView.vue'
 import ExperienceViewVue from '@/views/ExperienceView.vue'
 import WrapUpViewVue from "@/views/WrapUp.vue"
 import useStore from '@/stores/store'
-import store from '@/stores/store'
+import MakeDealViewVue from "@/views/MakeDealView.vue"
+
 
 
 const router = createRouter( {
@@ -30,6 +31,11 @@ const router = createRouter( {
       path: '/wrapup/:id',
       name: 'WrapUp',
       component: WrapUpViewVue,
+    },
+    {
+      path:"/makeDeal",
+      name:"MakeDeal",
+      component:MakeDealViewVue
     },
     {
       path: '/dashboard',

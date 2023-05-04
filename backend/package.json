@@ -26,6 +26,7 @@
     "seed": "ts-node ./prisma/seed.ts"
   },
   "dependencies": {
+    "@lighthouse-web3/sdk": "^0.2.3",
     "@metamask/eth-sig-util": "^5.0.3",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",

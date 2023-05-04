@@ -109,3 +109,8 @@ export async function createExperience ( data: ICreateExperience )
   const { data: resp } = await api.post<Experience>( `/experiences/`, data )
   return resp
 }
+
+export async function getCar(expId:number,recId:number,data:{url:string}){
+  const { data:resp } = await api.post<any>( `/experiences/${expId}/recordings/${recId}/generateCar`,data )
+  return resp
+}

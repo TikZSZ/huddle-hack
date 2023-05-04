@@ -1,12 +1,15 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { GetJwtToken } from 'src/global/decorators/param.decorator';
 import { AuthGuard } from 'src/global/guards/auth.guard';
 import { JwtToken } from 'src/global/types/JwtToken';
 import { PrismaService } from 'src/prisma.service';
 import { InitMeetDTO, ExperienceDTO, WrapUpDTO, } from './experience';
 import { ExperianceStatus } from 'src/global/models/enums';
-
-
+import lighthouse from "@lighthouse-web3/sdk"
+import https from "https"
+import fs from "fs"
+import path from 'path';
+import { authResponse } from '@lighthouse-web3/sdk/dist/Lighthouse/createCAR/dataDepotAuth';
 @Controller( 'experiences' )
 export class ExperiencesController
 {
@@ -61,7 +64,7 @@ export class ExperiencesController
     if ( !recMetadata ) throw new BadRequestException()
     const recording = await this.prisma.recording.findUnique( { where: { id: recordId } } )
     if ( !recording ) throw new NotFoundException()
-    
+
     if ( !recMetadata.tokenGatedRecording )
     {
       return { recMetadata, recording }
@@ -74,6 +77,79 @@ export class ExperiencesController
     }
     if ( !recording.recContractId ) throw new NotFoundException()
     return { recMetadata, recording: null, recContractId: recording!.recContractId }
+  }
+
+  @Post( "/:experienceId/recordings/:recordId/generateCar" )
+  @UseGuards( AuthGuard )
+  async getCarFile ( @Body() data: { url: string } )
+  {
+    if ( !data.url ) throw new BadRequestException()
+    const downloadedFilePath = await this.downloadFile( data.url )
+    // Get an auth token for the data depot service
+    // Note: you can use this token multiple times it expires in 20 days
+    const apiKey = process.env[ 'LIGHTHOUSE_API_KEY' ]
+    if ( !apiKey ) throw new InternalServerErrorException( "light house api key not found" )
+    const authToken = await lighthouse.dataDepotAuth( apiKey )
+    const carFile = await this.generateCAR( downloadedFilePath.filePath, authToken )
+    const d = await lighthouse.viewCarFiles( 1, authToken.data.access_token )
+    //https://data-depot.lighthouse.storage/api/download/download_car?fileId=${fileId}.car
+    // carLink https://gateway.lighthouse.storage/ipfs/bafybeicyzhl2f57t2tobokywkw2raqxu2yvm7s2x6y4tcgixc2ub4gg5te
+    return { ...d.data[ 0 ], carLink: `https://data-depot.lighthouse.storage/api/download/download_car?fileId=${d.data[0].id}.car` }
+  }
+
+  private downloadFile ( url: string )
+  {
+    const fileName = path.basename( url );
+    const filePath = path.join( __dirname, "..", 'downloads', fileName );
+
+    return new Promise<{ filePath: string }>( ( res, rej ) =>
+    {
+      if ( !fs.existsSync( path.dirname( filePath ) ) )
+      {
+        fs.mkdirSync( path.dirname( filePath ), { recursive: true } );
+      }
+      https.get( url, ( response ) =>
+      {
+        const fileStream = fs.createWriteStream( filePath, { flags: 'wx' } );
+        response.pipe( fileStream );
+
+        response.on( 'error', ( error ) =>
+        {
+          console.error( `Error downloading file ${fileName}: ${error.message}` );
+          rej( error.message )
+        } );
+
+        fileStream.on( 'finish', () =>
+        {
+          fileStream.close()
+          console.log( `File ${fileName} downloaded successfully!` );
+          res( { filePath: filePath } )
+        } );
+
+        fileStream.on( 'error', ( error ) =>
+        {
+          fs.unlink( filePath, () =>
+          {
+            console.error( `Error downloading file ${fileName}: ${error.message}` );
+            rej( error.message )
+          } );
+        } );
+      } );
+    } )
+  }
+
+  async generateCAR ( filePath: string, authToken: authResponse )
+  {
+
+
+    // Create CAR
+    const response = await lighthouse.createCar( filePath, authToken.data.access_token )
+
+    console.log( response )
+    /*
+      { data: 'Uploaded the files successfully' }
+    */
+    return response
   }
 
   @Patch( "/:experienceId/stats" )
@@ -104,10 +180,10 @@ export class ExperiencesController
   @UseGuards( AuthGuard )
   async wrapUp ( @Param( "experienceId", new ParseIntPipe() ) experienceId: number, @Body() data: WrapUpDTO )
   {
-    const exp = await this.prisma.experience.findUnique( { where: { id: experienceId },select:{id:true,experianceStats:{select:{experianceStatus:true}},tokenGatedRecording:true} } )
+    const exp = await this.prisma.experience.findUnique( { where: { id: experienceId }, select: { id: true, experianceStats: { select: { experianceStatus: true } }, tokenGatedRecording: true } } )
     if ( !exp ) throw new NotFoundException()
-    if(exp.experianceStats!.experianceStatus === "FINISHED") throw new BadRequestException()
-    const {saveRecording,recContractId,url,...rest} = data
+    if ( exp.experianceStats!.experianceStatus === "FINISHED" ) throw new BadRequestException()
+    const { saveRecording, recContractId, url, ...rest } = data
     if ( !saveRecording )
     {
       return this.prisma.experience.update( {
@@ -116,27 +192,29 @@ export class ExperiencesController
         },
         include: { experianceStats: true, hosts: true }
       } )
-    }else if (url && !exp.tokenGatedRecording){
+    } else if ( url && !exp.tokenGatedRecording )
+    {
       return this.prisma.experience.update( {
         where: { id: experienceId }, data: {
           experianceStats: { update: { experianceStatus: "FINISHED" } },
-          recordings:{
-            create:{
-              ...rest,url,
-              dateRecorded: (new Date()).toISOString()
+          recordings: {
+            create: {
+              ...rest, url,
+              dateRecorded: ( new Date() ).toISOString()
             }
           }
         },
         include: { experianceStats: true, hosts: true }
       } )
-    }else {
+    } else
+    {
       return this.prisma.experience.update( {
         where: { id: experienceId }, data: {
           experianceStats: { update: { experianceStatus: "FINISHED" } },
-          recordings:{
-            create:{
-              ...rest,recContractId,
-              dateRecorded: (new Date()).toISOString()
+          recordings: {
+            create: {
+              ...rest, recContractId,
+              dateRecorded: ( new Date() ).toISOString()
             }
           }
         },

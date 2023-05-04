@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getExperience, getRecording, getRecordings, getRoomConfig, wrapUp as wrapUpAPI, initMeet as initMeetAPI, createIFrameRoom } from '@/utils/api';
+import { getExperience, getRecording, getRecordings, getRoomConfig, wrapUp as wrapUpAPI, initMeet as initMeetAPI, createIFrameRoom,getCar } from '@/utils/api';
 import type { Experience, RecordingResponse, Recordings } from '@/utils/types';
 import { onMounted, ref, type Ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -68,7 +68,10 @@ async function downloadRecording ( recId: number )
     const recordingContract = new RecordingsContract( { contractAddress: recMetadata.contractAddress }, provider )
     const recURL = await recordingContract.getRecording( recContractId )
     if ( !recURL ) throw new Error( `couldn't download a recording from ${recMetadata.contractAddress} for id ${recContractId}` )
-    triggerDownload( recURL )
+    //triggerDownload( recURL )
+    const car = await getCar(experience.value.id,recId,{url:recURL})
+    console.log(car);
+    
   } else
   {
     if ( recording && recording.url )
