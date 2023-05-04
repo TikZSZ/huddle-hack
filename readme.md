@@ -1,3 +1,5 @@
+## [Updated Demo Video Link !!](https://youtu.be/OtdXjATy4PI)
+
 # Welcome to HuddleCast
 HuddleCast is a communication platform that provides a secure and exclusive way for content creators and businesses to communicate with their audience. HuddleCast's main use case is to provide a customizable and secure way to host recurring events(experiences), such as online courses, webinars, and conferences, with features like token gated rooms and token gated recordings. It allso allows recordings to be saved to filecoin network through DealClient Contract
 #
@@ -5,16 +7,16 @@ HuddleCast is a communication platform that provides a secure and exclusive way 
 ![HuddleCast Flow](huddle-cast-flow.jpg)
 
 # Contents
-- [HuddleCast Structure](#huddlecast-structure)
+- [Project Structure](#huddlecast-structure)
 - [Contract Addresses](#contract-addresses-all-deployed-on-filecoin-hyperspace)
 - [Steps to run frontend](#steps-to-start-frontend)
 - [Steps to run backend](#steps-to-start-backend)
 - [Usage](#usage)
 - [Technologies Used](#technologies-used)
-- [Experience Creation Flow]
+- [Experience Creation Flow](#experience-creation-flow)
 
 
-## HuddleCast Structure
+## Project Structure
 - App frontend -> `frontend` dir
 - App backend -> `backend` dir
 - Smart contract source code -> `frontend/src/contract`
